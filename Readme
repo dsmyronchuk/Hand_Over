@@ -1,0 +1,42 @@
+1. Huawei:
+- 2G>2G:
+Ext: По ключу Source BSC, Target CI, Target LAC проверяется наличие ext соты в списке ext_2G2G_lst. Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell
+HO: Соседи создаются по принципу Source CI, Source LAC >>> Target CI, Target LAC
+
+- 2G>3G:
+Ext: По ключу Source BSC, Target CI, Target LAC проверяется наличие ext соты в словаре ext_2G3G_dict (LST GEXT3GCELL). Если ключа нет, ключ добавляется в словарь со значением имени из рпдб и создается комманда на добавление Ext Cell
+HO: Соседи создаются по именам (Source/Target_full_name). Если БС новая Source_full_name берется из РПДБ, Если БС не новая, то она должна находится в таблице oss_name_2g_dct ( LST GSMCELL ) и Source_full_name перепишется на данные из этой таблицы; Target Name берется из словаря ext_2G3G_dict
+
+
+- 3G>3G:
+Ext: По ключу Source BSC, Target CI, Target LAC проверяется наличие ext соты в списке ext_3G3G_lst. Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell
+HO intra: Если Source BCCH == Target BCCH. Соседи создаются по ключам Source CI, Source LAC >>> Target CI, Target LAC
+HO inter: Если Source BCCH != Target BCCH. Соседи создаются по ключам Source CI, Source LAC >>> Target CI, Target LAC
+
+- 3G>2G:
+Ext: По ключу Source BSC, Target CI, Target LAC проверяется наличие ext соты в словаре ext_2G3G_dict (LST UEXT2GCELL). Если ключа нет, ключ добавляется в словарь со значением Target CellID из рпдб и создается комманда на добавление Ext Cell
+HO: Соседи создаются по принципу Source BSC, Source CellID, GSM_Index ( достается из словаря ext_2G3G_dict )
+
+- LTE>LTE:
+Ext: По ключу Source Site Name, Target eNB, Target eNB CI ( 2 последних цифры ) проверяется наличие ext соты в списке ext_ltelte_lst. Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell
+HO: Соседи создаются по принципу Source eNB CI, Target eNB, Target eNB CI ( так как команды вводятся прямо на БС, с Source стороны нужен только номер соты - Source eNB CI )
+intra: Source_BCCH == Target_BCCH
+inter: Source_BCCH != Target_BCCH
+
+- LTE>2G:
+Ext: По ключу Source_Site_Name, Target_Cell_ID, Target_LAC проверяется наличие ext соты в списке (ext_lte2g). Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell. Таблица ext_lte2g не откуда не парсится, изначально список пустой ( таблицы LTE>2G нет в SQL )
+ARFCN: По ключу {i.Source_ENB}_{i.Source_ENB_CI}_{i.Target_BCCH} проверяется наличие частоты в списке. Если ключа нет, ключ добавляется в список, и создается комманда на добавление частоты. Таблица arfcn_lte2g не откуда не парсится, изначально список пустой ( таблицы LTE>2G_ARFCN нет в SQL )
+HO: Соседи создаются по принципу Source eNB CI, Target CI, Target LAC ( так как команды вводятся прямо на БС, с Source стороны нужен только номер соты - Source eNB CI )
+
+- 2G>LTE:
+Ext: По ключу Source_BSC, Target_Cell_ID, Target_LAC проверяется наличие ext соты в списке (ext_2glte). Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell. В команде важен Target_full_name где он берется описано ниже. Таблица ext_lte2g не откуда не парсится, изначально список пустой ( таблицы LTE>2G нет в SQL )
+HO: Соседи создаются по именам (Source/Target_full_name). Если БС новая Source_full_name берется из РПДБ, Если БС не новая, то она должна находится в таблице path_lte_oss_name (LST CELL) и Source_full_name перепишется на данные из этой таблицы; Target Name берется из словаря path_2g_oss_name если БС уже существует, если БС новая то нейм берется из rpdb
+
+- LTE>3G
+Ext: По ключу Source_Site_Name, Target_Cell_ID, Target_LAC проверяется наличие ext соты в списке ext_lte3g_lst (LST UEXT3GCELL). Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell
+HO: Соседи создаются по принципу Source_Site_Name BSC, Target_Cell_ID, Target_LAC
+
+
+
+
+
