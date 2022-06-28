@@ -34,7 +34,7 @@ class rpdb_cls:
         self.Source_full_name = self.used_name_bs(self.Source_Azimuth, self.Source_Site_Name, self.Source_BCCH)
         self.Target_full_name = self.used_name_bs(self.Target_Azimuth, self.Target_Site_Name, self.Target_BCCH)
         self.Source_ncc = self.ncc(self.Source_BSIC, self.Source_BCCH)
-        self.Target_ncc = self.ncc(self.Target_BSIC, self.Target_BCCH)
+        self.gi = self.ncc(self.Target_BSIC, self.Target_BCCH)
         self.Source_bcc = str(self.Source_BSIC)[-1]
         self.Target_bcc = str(self.Target_BSIC)[-1]
         if self.Source_BCCH in (1700, 2900, 3676):
