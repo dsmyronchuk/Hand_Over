@@ -36,7 +36,11 @@ HO: Соседи создаются по именам (Source/Target_full_name).
 Ext: По ключу Source_Site_Name, Target_Cell_ID, Target_LAC проверяется наличие ext соты в списке ext_lte3g_lst (LST UEXT3GCELL). Если ключа нет, ключ добавляется в список, и создается комманда на добавление Ext Cell
 HO: Соседи создаются по принципу Source_Site_Name BSC, Target_Cell_ID, Target_LAC
 
-
-
+2. ZTE:
+- External index 2G >> 2G/3G:
+Выкачиваю sql таблицу с всеми External index (таблицы - gsm_controller_gexternalgsmcell; GExternalUtranCellFDD) и создаю словари (ext_index2g2g, ext_index2g3g), где ключи Source_BSC, Target_Cell_ID, Target_LAC, а значение сам индекс.
+- New External index 2G >> 2G/3G:
+a.Функция max_ext_index выкачивает из (таблиц - gsm_controller_gexternalgsmcell; GExternalUtranCellFDD) индексы и создаёт из неё словари (dct_max_index_2g2g, dct_max_index_2g3g), где ключь это Source_BSC, а значение самое максимальный номер index в BSC.
+b.Если сота новая и нужно подобрать новый индекс, вызывается функция create_new_index, которая создаёт новый обьект в словарях (dct_max_index_2g2g, dct_max_index_2g3g), где значение у ключа на +1 больше от максимального на BSC
 
 

@@ -1,0 +1,103 @@
+-----My Command-----
+2G>2G
+CREATE:MOC="GGsmRelation",MOI="SubNetwork=922,MEID=922,GBssFunction=922,GBtsSiteManager=2347,GGsmCell=5,GGsmRelation=129",ATTRIBUTES="CILimitedNum=0,CellChangePriority=3,RepPrioCS=0,LimitedObjectId=\"0;0;0;0;0\",CtrlImsiProMode=0,NCellLayer=1,NC2MarginRxQual=30,IsDLRapidHoNcell=0,MacroMicroHoN_PS=2,PenaltyEmergHo=0,HoMarginRxLev_PS=30,refGGsmCell=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922,GBtsSiteManager=2530,GGsmCell=7\",PARENTLDN=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922,GBtsSiteManager=2347,GGsmCell=5\",RxLevMin_PS=15,MacroMicroHoN=4,NC2MarginRxLev=30,PwDownHoPriInd=0,CILimitedThs=\"63;63;63;63;63\",HoMarginRxQual_PS=30,TargetTrafficThsSC2=75,MsTxPwrMax_PS=5,ForbidEmergHo=0,HoMarginRxLev=30,refGExternalGsmCell=null,MacroMicroHoThs=20,HoMarginPbgt_PS=30,HoMarginRxQual=29,HoForceResThs=40,TPingPang=15,GGsmRelationSeq=129,userLabel=23475_25307,IsRelatedCell_PS=0,NCellDir=0,MacroMicroPvalue=48,PenaltyLevNonEmergHo=48,NC2ResThr=35,HoMarginRxLevSC2=40,NC2ResHys=3,MacroMicroHoThs_PS=20,DLRapidHoThs=30,IsMutual=0,RxLevMinSC2=15,SDDLRapidHoThs=10,RelationType=0,HoPriority_PS=3,SDDLRapidHoN=2,HoMarginPbgt=20,HoPriority=7,NC2RxLevMin=15,IsRelatedCell=0,PenaltyNonEmergHo=0,HoMarginRxQualSC2=40,ForbidNonEmergHo=0,GoodLevBadRQoffSet=\"20;15;10;5;0\",MacroMicroPtime=0,TargetTrafficThs_PS=70,NC2MarginPBGT=30,TargetCellTrafficThs=75,IsHoForceNcell=0,TargetCellTrafficThr=70,MaxForceHoDiff=9,DirectRetryCell=1,HoMarginPbgtSC2=40,GGsmRelation=129,DLRapidHoN=3,RxLevMin=16,PenaltyLevEmergHo=48,CCNSUPPORT=1,IsDualFreqRltCell=0,NC2MsTxPwrMax=5,RepPrioPS=0",EXTENDS="";
+
+
+2G>2G EXT
+CREATE:MOC="GExternalGsmCell",MOI="SubNetwork=922,MEID=922,GBssFunction=922,GExternalGsmCell=88",ATTRIBUTES="userLabel=\"\",bcc=1,msTxmaxCch2=5,msTxmaxCch1=5,cellIdentity=27101,MsTxPwrMax=5,mcc=255,cellBarAc2=0,psSupport=1,ncc=5,lac=2522,UmSynSupport=0,PARENTLDN=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922\",MsTxPwrMaxCch=5,CellBarAccess=0,rac=51,ReselOffset=0,PenaltyTime=0,penalTime2=0,penalTime1=0,RxLevAccessMin=10,freqBand=0,mnc=1,reselOff1=0,tempOffset2=0,tempOffset1=0,TemporaryOffset=1,rxLevAsMin2=12,rxLevAsMin1=12,reselOff2=0,exc_acc=0,refRemoteSp=null,hcs_Exist2=0,lsa_Id=0,hcs_Exist1=0,cellType=1,hcs_Thr1=0,hcs_Thr2=0,racc=0,prioClass2=0,bcchFrequency=873,ReselHysteresis=6,GExternalGsmCell=88,prioClass1=0",EXTENDS="";
+
+
+
+3G>3G
+BSC == Target BSC
+CREATE:MOC="UUtranRelation",MOI="SubNetwork=1322,MEID=1322,URncFunction=1322,UUtranCellFDD=52001,UUtranRelation=132252001",ATTRIBUTES="userLabel=KIE_CHK_ZOL_215_U1,qhcsEcN0Sib12=-10,refUUtranCellFDD=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UUtranCellFDD=52001\",useOfHCS=1,qhcsEcN0Sib11=-10,sb11orSib11bis=0,penaltyTimeSib11=1,blackListCellInd=0,penaltyTimeSib12=1,qoffset11RdoCmp=0,qoffset21RdoCmp=0,qoffset1SNSib11=0,qoffset1SNSib12=0,qoffset2SNSib12=0,whiteListCellInd=0,PARENTLDN=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UUtranCellFDD=52001\",cellIndivOffset=0,qoffset2SNSib11=0,qoffset22RdoCmp=0,UUtranRelation=132252001,qoffset12RdoCmp=0,measPrio=0,tempOffset1Sib12=0,tempOffset1Sib11=0,refUExternalUtranCellFDD=null,qhcsRscpSib12=-90,shareCover=0,qhcsRscpSib11=-90,stateMode=2,tempOffset2Sib11=0,tempOffset2Sib12=0",EXTENDS="";
+
+BSC != Target BSC
+CREATE:MOC="UUtranRelation",MOI="SubNetwork=1322,MEID=1322,URncFunction=1322,UUtranCellFDD=52001,UUtranRelation=138028711",ATTRIBUTES="userLabel=DNE_SNK_TOW_060_U1,qhcsEcN0Sib12=-10,refUUtranCellFDD=null,useOfHCS=1,qhcsEcN0Sib11=-10,sb11orSib11bis=0,penaltyTimeSib11=1,blackListCellInd=0,penaltyTimeSib12=1,qoffset11RdoCmp=0,qoffset21RdoCmp=0,qoffset1SNSib11=0,qoffset1SNSib12=0,qoffset2SNSib12=0,whiteListCellInd=0,PARENTLDN=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UUtranCellFDD=52001\",cellIndivOffset=0,qoffset2SNSib11=0,qoffset22RdoCmp=0,UUtranRelation=138028711,qoffset12RdoCmp=0,measPrio=0,tempOffset1Sib12=0,tempOffset1Sib11=0,refUExternalUtranCellFDD=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UExternalRncFunction=3,UExternalUtranCellFDD=138028711\",qhcsRscpSib12=-90,shareCover=0,qhcsRscpSib11=-90,stateMode=2,tempOffset2Sib11=0,tempOffset2Sib12=0",EXTENDS="";
+
+3G>3G EXT
+CREATE:MOC="UExternalUtranCellFDD",MOI="SubNetwork=1322,MEID=1322,URncFunction=1322,UExternalRncFunction=0,UExternalUtranCellFDD=125222251",ATTRIBUTES="iurSB4CMimoSptInd=0,flexMacdSuptInd=0,qqualMinSib12=-18,qrxlevMinSib12=-115,timeDelayJitter=5,primaryCpichPower=33,mncLength=2,refUUtranRegArea=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UUtranRegArea=150\",mimoSuptInd=0,anteLatitude=0,ul16QamSuppInd=0,csServLimitInd=0,adjClassZoneInd=0,rac=150,mulEdchRestrt=\"\",timeDelay=0,dCelDbMimoSupInd=0,fdpchSuptInd=1,sharingMCC=\"\",nrtMaxRateEdchD=5760,altitudeDir=0,rtMaxDlRateDchD=384,uncertCode=72,dCelDcMimoSupInd=0,maxDtxCyc=7,snacNum=0,iurMfHsdSuptInd=0,primaryScramblingCode=51,anteAltitude=0,closedLoopMode1SuptInd=1,iurDcHsuMulInd=0,maximumAllowedUlTxPower=24,latitude=0,utranGpsSptInd=0,deltaQrxlevminSib12Pr=0,deltaQrxlevminSib12=-2,aResPara10=0,nbrCodHsscch=2,anteType=0,hcsPrio=0,qrxlevMin=-115,rtMaxRateEdchD=5760,gaRptType=0,uarfcnUl=9762,nrtMaxDlRateDchD=384,rncId=1252,iurDbHsdSuptInd=0,adjCs64Switch=1,eFdpchSupInd=1,iurMcHsdsSptInd=0,polyLatitude=\"0;0;0\",mimo64QamSuptInd=0,sndSvrCelIDList=\"\",offsetAngle=0,sharingMNC=\"\",uarfcnDl=10712,dl64QamSuptInd=0,cellRadius=10000,cellMode=1,polyLongitude=\"0;0;0\",iurDcHsuTrModInd=1,innerAngle=0,adjPreCodeResInd=0,sharingMNCLength=\"\",uncertAltitude=0,externalCellType=0,UExternalUtranCellFDD=125222251,backupAdjRncID=65535,pcpichPwrPre=0,maxNumofSndCell=0,polygonPointNum=3,freqBandInd=0,iurDcHsdsSuptInd=0,cpcHslessSuptInd=1,dbSndCIdList=\"\",nrtMaxUlRateDchD=384,mcc=255,hsdschSuptCgtDetInd=0,lac=2551,dbSndSvrCelNum=0,PARENTLDN=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UExternalRncFunction=0\",edchTti2SuptInd=0,longitude=0,aResPara5=0,aResPara6=0,aResPara3=0,ePowBoostSuppInd=0,aResPara4=0,cellDescripType=0,aResPara1=0,aResPara2=0,edchSfCap=4,aResPara9=0,dpSttdPSMimoInd=0,aResPara7=0,aResPara8=0,anteAltitudeDir=0,iurDB4CMimoSptInd=0,backupAdjCellID=65535,adjImpUL2SuptInd=0,sttdSupportIndicator=1,cpcDtxDrxSuptInd=1,userLabel=KIE_VIN_ASD_010_U1,altitude=0,psServLimitInd=0,hsdStat=1,anteLongitude=0,qqualMin=-18,latitudeSign=0,deltaQrxlevminPr=0,snacList=\"\",edchSuptCgtDetInd=0,anteLatitudeSign=0,deltaQrxlevmin=-2,sac=22251,altitudeAcc=0,rtMaxUlRateDchD=384,cId=22251,mnc=1,iurDcHsuSuptInd=0,confidence=0,emergLimitInd=0,nbrCodHspdsch=5,edchHarqCombCap=2,hspaSptMeth=3,polyLatitudeSign=\"0;0;0\"",EXTENDS="";
+
+
+
+2G>3G
+CREATE:MOC="GUtranRelation",MOI="SubNetwork=922,MEID=922,GBssFunction=922,GBtsSiteManager=2347,GGsmCell=5,GUtranRelation=129",ATTRIBUTES="userLabel=23475_53592,RepPrioCS=0,TargetCellTrafficThs=75,refGExternalUtranCellTDDLcr=null,HoEcNoOffset3G_PS=5,DirectRetryCell=1,UtranCellPrio=4,GUtranRelation=129,PARENTLDN=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922,GBtsSiteManager=2347,GGsmCell=5\",RelationType=0,HoEcNoOffset3G=5,GUtranRelationSeq=129,TargetCellTraThs_PS=70,CCNSUPPORT=0,NCEnergySavingInd=0,HoRSCPOffset3G_PS=5,refGExternalUtranCellFDD=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922,GExternalUtranCellFDD=429\",HoRSCPOffset3G=5,RepPrioPS=0",EXTENDS="";
+
+2G>3G EXT
+CREATE:MOC="GExternalUtranCellFDD",MOI="SubNetwork=922,MEID=922,GBssFunction=922,GExternalUtranCellFDD=21321321",ATTRIBUTES="userLabel=KIE_CHK_UMK_160_U1,mnc=1,arfcn3g=10712,GExternalUtranCellFDD=21321321,ci=56991,mcc=255,scCode=505,lac=8221,PARENTLDN=\"SubNetwork=922,MEID=922,ConfigSet=0,GBssFunction=922\",diversity=0,inner3GNcell=0,rac=170,rnc_id=1322",EXTENDS="";
+
+3G>2G EXT
+CREATE:MOC="UExternalGsmCell",MOI="SubNetwork=1322,MEID=1322,URncFunction=1322,UExternalGsmCell=251969221",ATTRIBUTES="userLabel=KIE_CHK_UTK_050_U1,bcc=5,qrxlevMinSib12=-115,gcResPara3=0,maximumAllowedUlTxPower=30,gcResPara2=0,gcResPara1=0,deltaQrxlevminPr=0,mncLength=2,deltaQrxlevminSib12Pr=0,cellIdentity=25196,geranCellInd=1,snacList=\"\",deltaQrxlevminSib12=-2,gsmUlRtLdThrd=75,mcc=255,ncc=0,lac=9221,deltaQrxlevmin=-2,PARENTLDN=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322\",hcsPrio=0,qrxlevMin=-115,rac=30,cellIndivOffset=0,gcResPara5=0,gcResPara4=0,fillStartValueSw=0,sharingMCC=\"\",mnc=1,sharingMNC=\"\",gsmDlLdThrd=85,UExternalGsmCell=251969221,snacNum=0,sharingMNCLength=\"\",bandIndicator=0,gsmUlLdThrd=85,bscId=322,racc=0,gsmDlRtLdThrd=75,indoorCellInd=0,bcchFrequency=876",EXTENDS="";
+
+3G>2G
+CREATE:MOC="UGsmRelation",MOI="SubNetwork=1322,MEID=1322,URncFunction=1322,UUtranCellFDD=52001,UGsmRelation=434313221",ATTRIBUTES="userLabel=KIE_CHK_AGR_180_D,useOfHCS=1,gsmStateMode=2,penaltyTimeSib11=1,blackListCellInd=0,penaltyTimeSib12=1,UGsmRelation=434313221,qoffset1SNSib11=0,qoffset1SNSib12=0,whiteListCellInd=0,PARENTLDN=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UUtranCellFDD=52001\",refUExternalGsmCell=\"SubNetwork=1322,MEID=1322,ConfigSet=0,URncFunction=1322,UExternalGsmCell=848\",qhcsSib11=-90,qhcsSib12=-90,gsmShareCover=0,measPrio=0,tempOffset1Sib12=0,tempOffset1Sib11=0,snacNbr=\"\",ncToSelfPhyRnc=0,sib11orSib11bis=0,snacNbrNum=0,indGUShare=0",EXTENDS="";
+
+
+
+
+LTE > 2G Ext
+CREATE:MOC="ExternalGsmCell",MOI="SubNetwork=10001,MEID=2579,ENBFunctionFDD=560172,ExternalGsmCell=5",ATTRIBUTES="userLabel=KIE_TST_TST,ExternalGsmCell=5,freqBand=9,mnc=01,bcc=1,cellIdentity=5555,isSupportDTM=0,mcc=255,lac=3221,ncc=2,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rac=30,isSupportPSHO=1,isSupportVoIP=0,rimCellFlag=1,bcchFrequency=817",EXTENDS="";
+
+
+LTE > 2G
+CREATE:MOC="GsmRelation",MOI="SubNetwork=10001,MEID=2579,ENBFunctionFDD=560172,EUtranCellFDD=143404113,GsmRelation=15",ATTRIBUTES="GsmRelation=15,userLabel=KIE_CHK_TST,ratShareCover=0,whiteListNbrInd=0,isRemoveAllowed=1,isRatESCoveredBy=0,refExternalGsmCell=\"SubNetwork=10001,MEID=2579,ConfigSet=0,ENBFunctionFDD=560172,ExternalGsmCell=5\",cSSUpdateAllowed=1,isHOSupport=1,cSSSupport=0",EXTENDS="";
+
+
+LTE > 3G Ext
+CREATE:MOC="ExternalUtranCellFDD",MOI="SubNetwork=10001,MEID=2573,ENBFunctionFDD=560074,ExternalUtranCellFDD=21",ATTRIBUTES="userLabel=KIE_CHK_TST,mnc=01,freqBandInd=0,ExternalUtranCellFDD=21,uarfcnDl=2140,mcc=255,lac=9221,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rac=30,isSupportPSHO=1,isSameStaWithLTE=0,isSupportHSPA=4,uarfcnUl=1952.4,isSupportVoIP=0,primaryScramblingCode=501,rimCellFlag=1,rncId=1872,cId=5555",EXTENDS="";
+
+
+LTE > 3G 
+Co-site - ratShareCover=1, 
+обычные - ratShareCover=0 
+
+CREATE:MOC="UtranRelation",MOI="SubNetwork=10001,MEID=2573,ENBFunctionFDD=560074,EUtranCellFDD=143378975,UtranRelation=25",ATTRIBUTES="refExternalUtranCellFDD=\"SubNetwork=10001,MEID=2573,ConfigSet=0,ENBFunctionFDD=560074,ExternalUtranCellFDD=21\",userLabel=KIE_CHK_TST,ratShareCover=1,refExternalUtranCellTDD=null,whiteListNbrInd=0,isRatESCoveredBy=0,isRemoveAllowed=1,isHOSupport=0,UtranRelation=25,isAnrCreated=0",EXTENDS="";
+
+LTE>LTE
+# LTE 900:
+freqBandInd=8
+earfcnUl=902.6
+earfcnDl=947.6
+
+# LTE 1800:
+freqBandInd=3
+earfcnUl=1760
+earfcnDl=1855
+
+# 3 MHz
+bandWidthUl=1
+bandWidthDl=1
+# 20 MHz
+bandWidthUl=5
+bandWidthDl=5
+# 15 MHz
+bandWidthUl=4
+bandWidthDl=4
+
+LTE > LTE Ext
+CREATE:MOC="ExternalEUtranCellFDD",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,ExternalEUtranCellFDD=17",ATTRIBUTES="userLabel=KIE_TST_TST_L18,freqBandInd=8,earfcnDl=947.6,algLTEFDDRsved1=0,latitude=-90,cellLocalId=81,nbrEnDcAnchorInd=0,mcc=255,ExternalEUtranCellFDD=17,cellMbsfnAtt=0,massiveMIMOInd=0,esCellNum=0,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rsrpThrPrachInfoList=\"-118;-123;-127\",earfcnUl=902.6,pci=107,tac=9221,bandWidthUl=1,alias=\"\",buildPhyLocation=\"\",voLTESwch=1,freqBandPriSwch=0,longitude=-180,mnc=01,antPort1=1,addiFreqBand=\"0;0;0;0;0;0;0;0\",bandWidthDl=1,eNBId=450000,emtcSwch=0,freqBandPriInd=0,cellType=0",EXTENDS="";
+
+LTE > LTE ( Co-cite)
+CREATE:MOC="EUtranRelation",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,EUtranCellFDD=143405649,EUtranRelation=13",ATTRIBUTES="userLabel=KIE_TST_TST,overlapCoverage=50,coverESCell=0,noSupMobilitySwch=0,overlapRateUpdateSwch=1,overlapRate=255,bigSRVHOIndUL=1,switchonTimeWindow=1,isBasicCoverageCell=0,coperType=0,whiteListNbrInd=0,isRemoveAllowed=1,cellIndivOffset=15,bigSRVHOIndDL=1,isHOAllowed=1,s1DataFwdFlag=0,EUtranRelation=13,stateInd=2,resPRBDown=50,cellIndiOffstPlmn=\"15;15;15;15;15;15\",autoShareCover=0,refEUtranCellFDD=\"SubNetwork=10001,MEID=2582,ConfigSet=0,ENBFunctionFDD=560178,EUtranCellFDD=143405650\",refExternalEUtranCellTDD=null,algLTENBRRsved1=0,nSACellIndivOffset=15,hSpeedRailCellInd=0,coperModSwch=0,isESCoveredBy=0,refExternalEUtranCellFDD=null,supportMRO=1,lbIntraMeasureOffset=-3,shareCover=0,numRRCCntNumCov=100,qofStCell=15,resPRBUp=50,isAnrCreated=0,isX2HOAllowed=1,nSACellIndOffPlmn=\"15;15;15;15;15;15\"",EXTENDS="";
+
+LTE > LTE ( External Cell )
+CREATE:MOC="EUtranRelation",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,EUtranCellFDD=143405649,EUtranRelation=13",ATTRIBUTES="userLabel=KIE_TST_TST,overlapCoverage=50,coverESCell=0,noSupMobilitySwch=0,overlapRateUpdateSwch=1,overlapRate=255,bigSRVHOIndUL=1,switchonTimeWindow=1,isBasicCoverageCell=0,coperType=0,whiteListNbrInd=0,isRemoveAllowed=1,cellIndivOffset=15,bigSRVHOIndDL=1,isHOAllowed=1,s1DataFwdFlag=0,EUtranRelation=13,stateInd=2,resPRBDown=50,cellIndiOffstPlmn=\"15;15;15;15;15;15\",autoShareCover=0,refEUtranCellFDD=null,refExternalEUtranCellTDD=null,algLTENBRRsved1=0,nSACellIndivOffset=15,hSpeedRailCellInd=0,coperModSwch=0,isESCoveredBy=0,refExternalEUtranCellFDD=\"SubNetwork=10001,MEID=2582,ConfigSet=0,ENBFunctionFDD=560178,ExternalEUtranCellFDD=13\",supportMRO=1,lbIntraMeasureOffset=-3,shareCover=0,numRRCCntNumCov=100,qofStCell=15,resPRBUp=50,isAnrCreated=0,isX2HOAllowed=1,nSACellIndOffPlmn=\"15;15;15;15;15;15\"",EXTENDS="";
+
+
+
+
+
+-----Command Lviv-----
+2G>2G
+CREATE:MOC="GGsmRelation",MOI="SubNetwork=408,MEID=408,GBssFunction=408,GBtsSiteManager=902,GGsmCell=1,GGsmRelation=129",ATTRIBUTES="IsDualFreqRltCell=0,MsTxPwrMax_PS=5,DLRapidHoThs=30,PenaltyEmergHo=0,HoMarginRxLev=29,DLRapidHoN=3,MacroMicroHoThs_PS=20,RxLevMin_PS=15,TargetTrafficThsSC2=75,SDDLRapidHoN=2,userLabel=9021_8921,PARENTLDN=\"SubNetwork=408,MEID=408,ConfigSet=0,GBssFunction=408,GBtsSiteManager=902,GGsmCell=1\",GGsmRelation=129,IsRelatedCell=0,CCNSUPPORT=1,TPingPang=15,refGGsmCell=\"SubNetwork=408,MEID=408,ConfigSet=0,GBssFunction=408,GBtsSiteManager=892,GGsmCell=1\",RelationType=0,HoMarginRxLev_PS=30,NC2MarginRxLev=30,HoMarginRxQual=28,NC2ResHys=3,HoMarginPbgt=36,MacroMicroHoN=4,MacroMicroHoThs=20,RxLevMin=15,HoPriority=3,ForbidNonEmergHo=0,GoodLevBadRQoffSet=\"20;15;10;5;0\",HoMarginPbgtSC2=40,PenaltyNonEmergHo=0,HoForceResThs=40,HoMarginRxQualSC2=40,NCellLayer=2,NCellDir=0,ForbidEmergHo=0,PenaltyLevEmergHo=48,CILimitedNum=0,LimitedObjectId=\"0;0;0;0;0\",HoPriority_PS=3,NC2MsTxPwrMax=5,NC2MarginPBGT=30,RxLevMinSC2=15,CILimitedThs=\"63;63;63;63;63\",HoMarginRxLevSC2=40,IsMutual=0,HoMarginPbgt_PS=30,CellChangePriority=3,IsRelatedCell_PS=0,RepPrioCS=0,IsHoForceNcell=0,MacroMicroHoN_PS=2,HoMarginRxQual_PS=30,NC2RxLevMin=15,TargetCellTrafficThr=70,GGsmRelationSeq=129,TargetCellTrafficThs=75,SDDLRapidHoThs=10,MaxForceHoDiff=9,PwDownHoPriInd=0,DirectRetryCell=1,TargetTrafficThs_PS=70,NC2MarginRxQual=30,PenaltyLevNonEmergHo=48,RepPrioPS=0,refGExternalGsmCell=null,NC2ResThr=35,IsDLRapidHoNcell=0",EXTENDS="";
+
+3G>3G
+CREATE:MOC="UUtranRelation",MOI="SubNetwork=1408,MEID=1408,URncFunction=1408,UUtranCellFDD=52621,UUtranRelation=140852622",ATTRIBUTES="whiteListCellInd=0,qoffset2SNSib12=0,qoffset2SNSib11=0,measPrio=0,refUUtranCellFDD=\"SubNetwork=1408,MEID=1408,ConfigSet=0,URncFunction=1408,UUtranCellFDD=52622\",useOfHCS=1,UUtranRelation=140852622,refUExternalUtranCellFDD=null,userLabel="LVI_PBS_KS3_120_U1",PARENTLDN=\"SubNetwork=1408,MEID=1408,ConfigSet=0,URncFunction=1408,UUtranCellFDD=52621\",tempOffset1Sib11=0,tempOffset1Sib12=0,shareCover=0,tempOffset2Sib12=0,qoffset21RdoCmp=0,tempOffset2Sib11=0,qhcsRscpSib11=-90,penaltyTimeSib12=1,penaltyTimeSib11=1,blackListCellInd=0,qoffset22RdoCmp=0,qhcsRscpSib12=-90,qoffset11RdoCmp=0,cellIndivOffset=0,qhcsEcN0Sib11=-10,stateMode=2,qhcsEcN0Sib12=-10,qoffset1SNSib11=0,qoffset12RdoCmp=0,qoffset1SNSib12=0,sb11orSib11bis=0",EXTENDS="";
+
+
+
+
+
+
+
+CREATE:MOC="GGsmRelation",MOI="SubNetwork=822,MEID=822,GBssFunction=822,GBtsSiteManager=2513,GGsmCell=3,GGsmRelation=185",ATTRIBUTES="CILimitedNum=0,CellChangePriority=3,RepPrioCS=0,LimitedObjectId=\"0;0;0;0;0\",CtrlImsiProMode=0,NCellLayer=1,NC2MarginRxQual=30,IsDLRapidHoNcell=0,MacroMicroHoN_PS=2,PenaltyEmergHo=0,HoMarginRxLev_PS=30,refGGsmCell=\"SubNetwork=822,MEID=822,ConfigSet=0,GBssFunction=822,GBtsSiteManager=2217,GGsmCell=1\",PARENTLDN=\"SubNetwork=822,MEID=822,ConfigSet=0,GBssFunction=822,GBtsSiteManager=2513,GGsmCell=3\",RxLevMin_PS=15,MacroMicroHoN=4,NC2MarginRxLev=30,PwDownHoPriInd=0,CILimitedThs=\"63;63;63;63;63\",HoMarginRxQual_PS=30,TargetTrafficThsSC2=75,MsTxPwrMax_PS=5,ForbidEmergHo=0,HoMarginRxLev=27,refGExternalGsmCell=null,MacroMicroHoThs=20,HoMarginPbgt_PS=30,HoMarginRxQual=26,HoForceResThs=40,TPingPang=15,GGsmRelationSeq=185,userLabel=25133_22171,IsRelatedCell_PS=0,NCellDir=0,MacroMicroPvalue=48,PenaltyLevNonEmergHo=48,NC2ResThr=35,HoMarginRxLevSC2=40,NC2ResHys=3,MacroMicroHoThs_PS=20,DLRapidHoThs=30,IsMutual=0,RxLevMinSC2=15,SDDLRapidHoThs=10,RelationType=0,HoPriority_PS=3,SDDLRapidHoN=2,HoMarginPbgt=30,HoPriority=3,NC2RxLevMin=15,IsRelatedCell=0,PenaltyNonEmergHo=0,HoMarginRxQualSC2=40,ForbidNonEmergHo=0,GoodLevBadRQoffSet=\"20;15;10;5;0\",MacroMicroPtime=0,TargetTrafficThs_PS=70,NC2MarginPBGT=30,TargetCellTrafficThs=75,IsHoForceNcell=0,TargetCellTrafficThr=70,MaxForceHoDiff=9,DirectRetryCell=1,HoMarginPbgtSC2=40,GGsmRelation=185,DLRapidHoN=3,RxLevMin=15,PenaltyLevEmergHo=48,CCNSUPPORT=1,IsDualFreqRltCell=0,NC2MsTxPwrMax=5,RepPrioPS=0",EXTENDS="";

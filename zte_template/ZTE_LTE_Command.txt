@@ -1,0 +1,46 @@
+LTE > 2G Ext
+CREATE:MOC="ExternalGsmCell",MOI="SubNetwork=10001,MEID=2579,ENBFunctionFDD=560172,ExternalGsmCell=5",ATTRIBUTES="userLabel=KIE_TST_TST,ExternalGsmCell=5,freqBand=9,mnc=01,bcc=1,cellIdentity=5555,isSupportDTM=0,mcc=255,lac=3221,ncc=2,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rac=30,isSupportPSHO=1,isSupportVoIP=0,rimCellFlag=1,bcchFrequency=817",EXTENDS="";
+
+
+LTE > 2G
+CREATE:MOC="GsmRelation",MOI="SubNetwork=10001,MEID=2579,ENBFunctionFDD=560172,EUtranCellFDD=143404113,GsmRelation=15",ATTRIBUTES="GsmRelation=15,userLabel=KIE_CHK_TST,ratShareCover=0,whiteListNbrInd=0,isRemoveAllowed=1,isRatESCoveredBy=0,refExternalGsmCell=\"SubNetwork=10001,MEID=2579,ConfigSet=0,ENBFunctionFDD=560172,ExternalGsmCell=5\",cSSUpdateAllowed=1,isHOSupport=1,cSSSupport=0",EXTENDS="";
+
+
+LTE > 3G Ext
+CREATE:MOC="ExternalUtranCellFDD",MOI="SubNetwork=10001,MEID=2573,ENBFunctionFDD=560074,ExternalUtranCellFDD=21",ATTRIBUTES="userLabel=KIE_CHK_TST,mnc=01,freqBandInd=0,ExternalUtranCellFDD=21,uarfcnDl=2140,mcc=255,lac=9221,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rac=30,isSupportPSHO=1,isSameStaWithLTE=0,isSupportHSPA=4,uarfcnUl=1952.4,isSupportVoIP=0,primaryScramblingCode=501,rimCellFlag=1,rncId=1872,cId=5555",EXTENDS="";
+
+
+LTE > 3G 
+Co-site - ratShareCover=1, 
+обычные - ratShareCover=0 
+
+CREATE:MOC="UtranRelation",MOI="SubNetwork=10001,MEID=2573,ENBFunctionFDD=560074,EUtranCellFDD=143378975,UtranRelation=25",ATTRIBUTES="refExternalUtranCellFDD=\"SubNetwork=10001,MEID=2573,ConfigSet=0,ENBFunctionFDD=560074,ExternalUtranCellFDD=21\",userLabel=KIE_CHK_TST,ratShareCover=1,refExternalUtranCellTDD=null,whiteListNbrInd=0,isRatESCoveredBy=0,isRemoveAllowed=1,isHOSupport=0,UtranRelation=25,isAnrCreated=0",EXTENDS="";
+
+LTE > LTE Ext
+# LTE 900:
+freqBandInd=8
+earfcnUl=902.6
+earfcnDl=947.6
+
+# LTE 1800:
+freqBandInd=3
+earfcnUl=1760
+earfcnDl=1855
+
+# 3 MHz
+bandWidthUl=1
+bandWidthDl=1
+# 20 MHz
+bandWidthUl=5
+bandWidthDl=5
+# 15 MHz
+bandWidthUl=4
+bandWidthDl=4
+
+CREATE:MOC="ExternalEUtranCellFDD",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,ExternalEUtranCellFDD=17",ATTRIBUTES="userLabel=KIE_TST_TST_L18,freqBandInd=8,earfcnDl=947.6,algLTEFDDRsved1=0,latitude=-90,cellLocalId=81,nbrEnDcAnchorInd=0,mcc=255,ExternalEUtranCellFDD=17,cellMbsfnAtt=0,massiveMIMOInd=0,esCellNum=0,plmnIdList=(OBJ)[{mcc=255,mnc=01}],rsrpThrPrachInfoList=\"-118;-123;-127\",earfcnUl=902.6,pci=107,tac=9221,bandWidthUl=1,alias=\"\",buildPhyLocation=\"\",voLTESwch=1,freqBandPriSwch=0,longitude=-180,mnc=01,antPort1=1,addiFreqBand=\"0;0;0;0;0;0;0;0\",bandWidthDl=1,eNBId=450000,emtcSwch=0,freqBandPriInd=0,cellType=0",EXTENDS="";
+
+LTE > LTE ( Co-cite)
+CREATE:MOC="EUtranRelation",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,EUtranCellFDD=143405649,EUtranRelation=13",ATTRIBUTES="userLabel=KIE_TST_TST,overlapCoverage=50,coverESCell=0,noSupMobilitySwch=0,overlapRateUpdateSwch=1,overlapRate=255,bigSRVHOIndUL=1,switchonTimeWindow=1,isBasicCoverageCell=0,coperType=0,whiteListNbrInd=0,isRemoveAllowed=1,cellIndivOffset=15,bigSRVHOIndDL=1,isHOAllowed=1,s1DataFwdFlag=0,EUtranRelation=13,stateInd=2,resPRBDown=50,cellIndiOffstPlmn=\"15;15;15;15;15;15\",autoShareCover=0,refEUtranCellFDD=\"SubNetwork=10001,MEID=2582,ConfigSet=0,ENBFunctionFDD=560178,EUtranCellFDD=143405650\",refExternalEUtranCellTDD=null,algLTENBRRsved1=0,nSACellIndivOffset=15,hSpeedRailCellInd=0,coperModSwch=0,isESCoveredBy=0,refExternalEUtranCellFDD=null,supportMRO=1,lbIntraMeasureOffset=-3,shareCover=0,numRRCCntNumCov=100,qofStCell=15,resPRBUp=50,isAnrCreated=0,isX2HOAllowed=1,nSACellIndOffPlmn=\"15;15;15;15;15;15\"",EXTENDS="";
+
+LTE > LTE ( External Cell )
+CREATE:MOC="EUtranRelation",MOI="SubNetwork=10001,MEID=2582,ENBFunctionFDD=560178,EUtranCellFDD=143405649,EUtranRelation=13",ATTRIBUTES="userLabel=KIE_TST_TST,overlapCoverage=50,coverESCell=0,noSupMobilitySwch=0,overlapRateUpdateSwch=1,overlapRate=255,bigSRVHOIndUL=1,switchonTimeWindow=1,isBasicCoverageCell=0,coperType=0,whiteListNbrInd=0,isRemoveAllowed=1,cellIndivOffset=15,bigSRVHOIndDL=1,isHOAllowed=1,s1DataFwdFlag=0,EUtranRelation=13,stateInd=2,resPRBDown=50,cellIndiOffstPlmn=\"15;15;15;15;15;15\",autoShareCover=0,refEUtranCellFDD=null,refExternalEUtranCellTDD=null,algLTENBRRsved1=0,nSACellIndivOffset=15,hSpeedRailCellInd=0,coperModSwch=0,isESCoveredBy=0,refExternalEUtranCellFDD=\"SubNetwork=10001,MEID=2582,ConfigSet=0,ENBFunctionFDD=560178,ExternalEUtranCellFDD=13\",supportMRO=1,lbIntraMeasureOffset=-3,shareCover=0,numRRCCntNumCov=100,qofStCell=15,resPRBUp=50,isAnrCreated=0,isX2HOAllowed=1,nSACellIndOffPlmn=\"15;15;15;15;15;15\"",EXTENDS="";

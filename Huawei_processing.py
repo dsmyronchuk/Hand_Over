@@ -1,69 +1,30 @@
+import openpyxl
 from rows_initialization import rpdb_cls
 import pandas as pd
+import sql_request
 
 
 class Huawei:
     lst_huawei = []
-    index_BSC = {'383': '703', '384': '713', '395': '723', '15290': '733', '15394': '743', '15395': '753',
-                 '259': '903', '359': '913', '381': '923', '382': '933', '62233': '210', '62236': '220',
-                 '62526': '230', '22207': '503', '22279': '513', '402': '523', '22349': '533', '20705': '543',
-                 '20704': '553', '20703': '563', '61602': '112', '61526': '102', '22461': '1503',
-                 '22623': '1513', '368': '1543', '366': '1703', '15396': '1723', '360': '1903', '365': '1923',
-                 '356': '1862', '22178': '1872', '260': '1340', '22832': '1380'}
 
     Huawei_from_2G = dict()    # Словарь с 2же командами
     Huawei_from_3G = dict()    # Словарь с 3же командами
     Huawei_from_LTE = dict()   # Словарь с LTE командами
 
-    def __init__(self):
-        self.search_huawei()
+    def __init__(self, main_bs, path_folder):
+        self.main_bs = main_bs
+        self.path_folder = path_folder
 
-        # выгрузка имён из oss 2G,3G
-        path_2g_oss_name = 'SELECT fdn, CI, LAC, CELLNAME FROM `parse_huawei`.`GSM_BSC6910GSMGCELL`'
-        path_3g_oss_name = 'SELECT LOGICRNCID, CELLID, LAC, CELLNAME FROM`parse_huawei`.`UMTS_BSC6910UMTSUCELL`'
-        path_lte_oss_name = 'SELECT ENODEBFUNCTIONNAME, CELLID, DLEARFCN, CELLNAME FROM`parse_huawei`.`BBU_BTS3900CELL`'
-        self.oss_name_2g_dct = self.get_dct_4column(path_2g_oss_name, 'fdn', 'CI', 'LAC', 'CELLNAME')
-        self.oss_name_3g_dct = self.get_dct_4column(path_3g_oss_name, 'LOGICRNCID', 'CELLID', 'LAC', 'CELLNAME')
-        self.oss_name_lte_dct = self.get_dct_4column(path_lte_oss_name, 'ENODEBFUNCTIONNAME', 'CELLID', 'DLEARFCN',
-                                                     'CELLNAME')
-
-        # выгрузка NE имен из oss и создание имени self.Name_NE
-        path_lte_oss_name = 'SELECT NAME FROM`parse_huawei`.`BBU_BTS3900NE`'
-        self.oss_ne_name_lte_lst = self.get_lst_1column(path_lte_oss_name)
-        self.get_ne_name()
-
-        # обработка таблицы EXT 2G2G
-        path_2g2g_ext = 'SELECT fdn, CI, LAC FROM `parse_huawei`.`GSM_BSC6910GSMGEXT2GCELL`'
-        self.ext_2G2G_lst = self.get_lst_3column(path_2g2g_ext, 'fdn', 'CI', 'LAC')
-
-        # обработка таблицы EXT 2G3G
-        path_2g3g_ext = 'SELECT fdn, CI, LAC, EXT3GCELLNAME FROM `parse_huawei`.`GSM_BSC6910GSMGEXT3GCELL`'
-        self.ext_2G3G_dict = self.get_dct_4column(path_2g3g_ext, 'fdn', 'CI', 'LAC', 'EXT3GCELLNAME')
-
-        # обработка таблицы EXT 3G2G
-        path_3g2g_ext = 'SELECT LOGICRNCID, CID, LAC, GSMCELLINDEX FROM `parse_huawei`.`UMTS_BSC6910UMTSGSMCELL`'
-        self.ext_3G2G_dict = self.get_dct_4column(path_3g2g_ext, 'LOGICRNCID', 'CID', 'LAC', 'GSMCELLINDEX')
-
-        # обработка таблицы EXT 3G3G
-        path_3g3g_ext = 'SELECT LOGICRNCID, CELLID, LAC FROM `parse_huawei`.`UMTS_BSC6910UMTSNRNCCELL`'
-        self.ext_3G3G_lst = self.get_lst_3column(path_3g3g_ext, 'LOGICRNCID', 'CELLID', 'LAC')
-
-        # обработка таблицы EXT LTELTE
-        path_ltelte_ext = 'SELECT ENODEBFUNCTIONNAME, ENODEBID, CELLID FROM ' \
-                          '`parse_huawei`.`BBU_BTS3900EUTRANEXTERNALCELL`'
-        self.ext_ltelte_lst = self.get_lst_3column(path_ltelte_ext, 'ENODEBFUNCTIONNAME', 'ENODEBID', 'CELLID')
-
-        # обработка таблицы EXT LTE3G
-        path_lte3g_ext = 'SELECT ENODEBFUNCTIONNAME, CELLID, LAC FROM `parse_huawei`.`BBU_BTS3900UTRANEXTERNALCELL`'
-        self.ext_lte3g_lst = self.get_lst_3column(path_lte3g_ext, 'ENODEBFUNCTIONNAME', 'CELLID', 'LAC')
-
-        # переменные для хранения EXT и ARFCN LTE<>2G
+        # переменные для хранения EXT и ARFCN LTE<>2G ( исключение дубликатов )
         self.ext_lte2g = []
         self.arfcn_lte2g = []
         self.ext_2glte = []
 
-        self.name_correction_all_bs()
+        self.search_huawei()                    # Из общего списка HandOver ищу Source Huawei обьекты
+        self.names_functions()                  # Функции для выгрузки и обработки корректных имен из БД
+        self.table_functions_external()         # работа с таблицами Externall Cell
 
+        # Генерация команд
         self.create_ho_2g2g()
         self.create_ho_2g3g()
         self.create_ho_3g3g()
@@ -73,64 +34,26 @@ class Huawei:
         self.create_ho_2glte()
         self.create_ho_lte3g()
 
-        # сортирую команды в нужном формате для записи в xlsx
-        self.__class__.Huawei_from_LTE = self.command_sort(self.__class__.Huawei_from_LTE,
-                                                           ['ADD EUTRANEXTERNALCELL', 'ADD EUTRANINTRAFREQNCELL',
-                                                            'ADD EUTRANINTERFREQNCELL', 'ADD GERANEXTERNALCELL',
-                                                            'ADD GERANNFREQGROUPARFCN', 'ADD GERANNCELL',
-                                                            'ADD UTRANEXTERNALCELL', 'ADD UTRANNCELL'])
-        self.__class__.Huawei_from_2G = self.command_sort(self.Huawei_from_2G,
-                                                          ['ADD GEXT2GCELL', 'ADD G2GNCELL', 'ADD GEXT3GCELL',
-                                                           'ADD G3GNCELL', 'ADD GEXTLTECELL', 'ADD GLTENCEL'])
-        self.__class__.Huawei_from_3G = self.command_sort(self.Huawei_from_3G,
-                                                          ['ADD UEXT3GCELL', 'ADD UINTRAFREQNCELL',
-                                                           'ADD UINTERFREQNCELL', 'ADD UEXT2GCELL', 'ADD U2GNCELL'
-                                                           'ADD U2GNCELL'])
+        self.sorting_for_xlsx()                 # Сортировка комманд в нужном формате для записи в xlsx
+        self.create_xlsx_file()                 # Создание итогового xlsx файла и запись в него команд
 
     def search_huawei(self):
         for i in rpdb_cls.lst_row:
             if i.Source_vendor == 'Huawei':
                 self.__class__.lst_huawei.append(i)
 
-    # функция для коннекта к SQL и вывода списка из 3х строк (по трём колонкам)
-    @staticmethod
-    def get_lst_3column(path, column_1, column_2, column_3):
-        sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
-        if column_1 == 'fdn':
-            sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-            sql_table[column_1] = sql_table[column_1].map(Huawei.index_BSC).fillna(sql_table[column_1])
-        sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
-                                                   axis=1)
-        out_lst = [i for i in sql_table['correct_key']]
-        return out_lst
+    def names_functions(self):
+        # выгрузка Cell Name из oss 2G,3G, LTE
+        path_2g_oss_name = sql_request.Huawei_2g_oss_name
+        path_3g_oss_name = sql_request.Huawei_3g_oss_name
+        path_ne_oss_name = sql_request.Huawei_lte_oss_name
+        self.oss_name_2g_dct = rpdb_cls.get_dct_4column(path_2g_oss_name, 'fdn', 'CI', 'LAC', 'CELLNAME', '3key_1value')
+        self.oss_name_3g_dct = rpdb_cls.get_dct_4column(path_3g_oss_name, 'LOGICRNCID', 'CELLID', 'LAC',
+                                                        'CELLNAME', '3key_1value')
+        self.oss_name_lte_dct = rpdb_cls.get_dct_4column(path_ne_oss_name, 'ENODEBFUNCTIONNAME', 'CELLID', 'DLEARFCN',
+                                                         'CELLNAME', '3key_1value')
 
-    # функция для коннекта к SQL и вывода словаря ключ: 3 колонки; значение: 4 колонка
-    @staticmethod
-    def get_dct_4column(path, column_1, column_2, column_3, column_4):
-        sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
-        if column_1 == 'fdn':
-            sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-            sql_table[column_1] = sql_table[column_1].map(Huawei.index_BSC).fillna(sql_table[column_1])
-        sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
-                                                   axis=1)
-        out_dict = {row['correct_key']: row[column_4] for index, row in sql_table.iterrows()}
-        return out_dict
-
-    # функция для коннекта к SQL и вывода списка из одной колонки
-    @staticmethod
-    def get_lst_1column(path):
-        sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
-        out_lst = [row for row in sql_table['NAME']]
-        return out_lst
-
-    def get_ne_name(self):
-        for i in self.__class__.lst_huawei:
-            for j in self.oss_ne_name_lte_lst:
-                if i.Source_Site_Name[:11] == j[:11]:
-                    i.NE_Name = j
-
-    # корректировка имени по OSS ( если сота есть в OSS - перезаписать имя из OSS )
-    def name_correction_all_bs(self):
+        # корректировка имени по OSS ( если сота есть в OSS - перезаписать имя из OSS )
         for i in Huawei.lst_huawei:
             if i.Source_BCCH < 950 and f'{i.Source_BSC}_{i.Source_Cell_ID}_{i.Source_LAC}' in self.oss_name_2g_dct:
                 i.Source_full_name = self.oss_name_2g_dct[f'{i.Source_BSC}_{i.Source_Cell_ID}_{i.Source_LAC}']
@@ -139,9 +62,10 @@ class Huawei:
                     in self.oss_name_3g_dct:
                 i.Source_full_name = self.oss_name_3g_dct[f'{i.Source_BSC}_{i.Source_Cell_ID}_{i.Source_LAC}']
 
-            if i.Source_BCCH in (1700, 3676, 2900) and f'{i.Source_Site_Name}_{i.Source_ENB_CI}_{i.Source_BCCH}'\
+            if i.Source_BCCH in (1700, 3676, 2900) and f'{i.Source_Site_Name}_{i.Source_ENB_CI}_{i.Source_BCCH}' \
                     in self.oss_name_lte_dct:
-                i.Source_full_name = self.oss_name_lte_dct[f'{i.Source_Site_Name}_{i.Source_ENB_CI}_{i.Source_BCCH}']
+                i.Source_full_name = self.oss_name_lte_dct[
+                    f'{i.Source_Site_Name}_{i.Source_ENB_CI}_{i.Source_BCCH}']
 
             if i.Target_BCCH < 950 and f'{i.Target_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}' in self.oss_name_2g_dct:
                 i.Target_full_name = self.oss_name_2g_dct[f'{i.Target_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}']
@@ -150,25 +74,48 @@ class Huawei:
                     in self.oss_name_3g_dct:
                 i.Target_full_name = self.oss_name_3g_dct[f'{i.Target_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}']
 
-            if i.Target_BCCH in (1700, 3676, 2900) and f'{i.Target_Site_Name}_{i.Target_ENB_CI}_{i.Target_BCCH}'\
+            if i.Target_BCCH in (1700, 3676, 2900) and f'{i.Target_Site_Name}_{i.Target_ENB_CI}_{i.Target_BCCH}' \
                     in self.oss_name_lte_dct:
-                i.Target_full_name = self.oss_name_lte_dct[f'{i.Target_Site_Name}_{i.Target_ENB_CI}_{i.Target_BCCH}']
+                i.Target_full_name = self.oss_name_lte_dct[
+                    f'{i.Target_Site_Name}_{i.Target_ENB_CI}_{i.Target_BCCH}']
 
-    # Сортировка Команд
-    @staticmethod
-    def command_sort(original_dct, lst_command):
-        new_dct = {}
-        for k in sorted(original_dct):              # создаю отсортированый словарь {ключ:пустой список}
-            new_dct[k] = []
+        # выгрузка NE имен из oss и создание имени self.Name_NE
+        path_ne_oss_name = sql_request.Huawei_ne_oss_name
+        sql_table = pd.read_sql(path_ne_oss_name, rpdb_cls.connect_sql())
+        self.oss_ne_name = [row for row in sql_table['NAME']]
 
-            for ls in lst_command:                  # прохожусь по каждой команде из списка
-                for v in original_dct[k]:           # прохожусь по старому словарю в новом порядке
-                    if ls in v[0]:                  # если команда из списка есть у данного ключа словаря
-                        new_dct[k].append(v)        # добавляю в новый словарь
+        # Если Source_Site_Name есть в БД подставить NE_Name ( имя БС в main topology ) из БД
+        for i in self.__class__.lst_huawei:
+            for j in self.oss_ne_name:
+                if i.Source_Site_Name[:11] == j[:11]:
+                    i.NE_Name = j
 
-        return new_dct
+    def table_functions_external(self):
+        # обработка таблицы EXT 2G2G
+        path_2g2g_ext = sql_request.Huawei_2g2g_ext
+        self.ext_2G2G_lst = rpdb_cls.get_lst_3column(path_2g2g_ext, 'fdn', 'CI', 'LAC')
 
-    # Функции вызовов генерации комманд
+        # обработка таблицы EXT 2G3G
+        path_2g3g_ext = sql_request.Huawei_2g3g_ext
+        self.ext_2G3G_dict = rpdb_cls.get_dct_4column(path_2g3g_ext, 'fdn', 'CI', 'LAC', 'EXT3GCELLNAME', '3key_1value')
+
+        # обработка таблицы EXT 3G2G
+        path_3g2g_ext = sql_request.Huawei_3g2g_ext
+        self.ext_3G2G_dict = rpdb_cls.get_dct_4column(path_3g2g_ext, 'LOGICRNCID', 'CID', 'LAC',
+                                                      'GSMCELLINDEX', '3key_1value')
+
+        # обработка таблицы EXT 3G3G
+        path_3g3g_ext = sql_request.Huawei_3g3g_ext
+        self.ext_3G3G_lst = rpdb_cls.get_lst_3column(path_3g3g_ext, 'LOGICRNCID', 'CELLID', 'LAC')
+
+        # обработка таблицы EXT LTELTE
+        path_4g4g_ext = sql_request.Huawei_4g4g_ext
+        self.ext_ltelte_lst = rpdb_cls.get_lst_3column(path_4g4g_ext, 'ENODEBFUNCTIONNAME', 'ENODEBID', 'CELLID')
+
+        # обработка таблицы EXT LTE3G
+        path_4g3g_ext = sql_request.Huawei_4g3g_ext
+        self.ext_lte3g_lst = rpdb_cls.get_lst_3column(path_4g3g_ext, 'ENODEBFUNCTIONNAME', 'CELLID', 'LAC')
+
     def create_ho_2g2g(self):
         for i in self.__class__.lst_huawei:
             if i.Type_ho == '2G>2G':
@@ -178,12 +125,12 @@ class Huawei:
                                        f',BCC={i.Target_bcc},RA={int(i.Target_RAC)};'
                     self.ext_2G2G_lst.append(i.Source_BSC__Target_CI_LAC)
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
-                                               [command_ext_2g2g, i.Type_ho])
+                                               [i.Type_ho, command_ext_2g2g])
 
                 command_2g2g = f'ADD G2GNCELL:IDTYPE=BYCGI,SRCMCC="255",SRCMNC="01",SRCLAC={i.Source_LAC}' \
                                f',SRCCI={i.Source_Cell_ID},NBRMCC="255",NBRMNC="01",NBRLAC={i.Target_LAC}' \
                                f',NBRCI={i.Target_Cell_ID},NCELLTYPE=HANDOVERNCELL,SRCHOCTRLSWITCH=HOALGORITHM1;'
-                rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [command_2g2g, i.Type_ho])
+                rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2g2g])
 
     def create_ho_2g3g(self):
         for i in self.__class__.lst_huawei:
@@ -195,13 +142,13 @@ class Huawei:
                                        f'",RA={i.Target_RAC};'
                     self.ext_2G3G_dict[i.Source_BSC__Target_CI_LAC] = i.Target_full_name
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
-                                               [command_ext_2g3g, i.Type_ho])
+                                               [i.Type_ho, command_ext_2g3g])
 
                 # Source Name из oss_name_2g_dct; Target Name из ext_2G3G_dict
                 command_2g3g = f'ADD G3GNCELL:IDTYPE=BYNAME,SRC3GNCELLNAME="{i.Source_full_name}",NBR3GNCELLNAME="' \
                                f'{self.ext_2G3G_dict[i.Source_BSC__Target_CI_LAC]}";'
                 rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
-                                           [command_2g3g, i.Type_ho])
+                                           [i.Type_ho, command_2g3g])
 
     def create_ho_3g3g(self):
         for i in self.__class__.lst_huawei:
@@ -218,14 +165,14 @@ class Huawei:
                                        f'ORT-1&HSPAPLUS_DL_64QAM_SUPPORT-1,EFACHSUPIND=FALSE;'
                     self.ext_3G3G_lst.append(i.Source_BSC__Target_CI_LAC)
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
-                                               [command_ext_3g3g, i.Type_ho])
+                                               [i.Type_ho, command_ext_3g3g])
 
                 if i.Source_BCCH == i.Target_BCCH:
                     command_3g3g = f'ADD UINTRAFREQNCELL:RNCID={i.Source_BSC},CELLID={i.Source_Cell_ID},NCELLRNCID=' \
                                    f'{i.Target_BSC},NCELLID={i.Target_Cell_ID},SIB11IND=TRUE,SIB12IND=FALSE,' \
                                    f'TPENALTYHCSRESELECT=D0,NPRIOFLAG=FALSE;'
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
-                                               [command_3g3g, i.Type_ho])
+                                               [i.Type_ho, command_3g3g])
                 if i.Source_BCCH != i.Target_BCCH:
 
                     blind = 'FALSE'
@@ -237,7 +184,7 @@ class Huawei:
                                    f'HCSRESELECT=D0,BLINDHOFLAG={blind},NPRIOFLAG=FALSE,INTERNCELLQUALREQFLAG=FALSE,' \
                                    f'CLBFLAG=FALSE;'
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
-                                               [command_3g3g, i.Type_ho])
+                                               [i.Type_ho, command_3g3g])
 
     def create_ho_3g2g(self):
         for i in self.__class__.lst_huawei:
@@ -250,12 +197,12 @@ class Huawei:
                                        f'{i.Target_BCCH},RATCELLTYPE=EDGE,USEOFHCS=NOT_USED,SUPPPSHOFLAG=TRUE;'
                     self.ext_3G2G_dict[i.Source_BSC__Target_CI_LAC] = i.Target_Cell_ID
                     rpdb_cls.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
-                                               [command_ext_3g2g, i.Type_ho])
+                                               [i.Type_ho, command_ext_3g2g])
 
                 command_3g2g = f'ADD U2GNCELL:RNCID={i.Source_BSC},CELLID={i.Source_Cell_ID},GSMCELLINDEX=' \
                                f'{self.ext_3G2G_dict[i.Source_BSC__Target_CI_LAC]},BLINDHOFLAG=FALSE,NPRIOFLAG=FALSE;'
                 rpdb_cls.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
-                                           [command_3g2g, i.Type_ho])
+                                           [i.Type_ho, command_3g2g])
 
     def create_ho_ltelte(self):
         for i in self.__class__.lst_huawei:
@@ -267,24 +214,24 @@ class Huawei:
                                          f'UPDATEMODE=MFBI_UPDATE_MODE-1,SUPPORTEMTCFLAG=BOOLEAN_FALSE,AGGREGATIONAT' \
                                          f'TRIBUTE=MASTER_PLMN_RESERVED_FLAG-1;'
                     self.ext_ltelte_lst.append(f'{i.Source_Site_Name}_{i.Target_ENB}_{i.Target_ENB_CI}')
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_ext_ltelte,
-                                               i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_ext_ltelte])
 
                 if i.Source_BCCH == i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTRAFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
                                      f'{i.Source_full_name},NEIGHBOURCELLNAME={i.Target_full_name},AGGREGATIONATTRI' \
                                      f'BUTE=UL_INTRF_DET_COORD_NCELL_FLAG-0;'
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_ltelte,
-                                               i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_ltelte])
                 if i.Source_BCCH != i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTERFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
                                      f'{i.Source_full_name}+ ,NEIGHBOURCELLNAME={i.Target_full_name} + ,AGGREGATIONP' \
                                      f'ROPERTY=BlindScellCfg-1,OVERLAPINDICATOREXTENSION=VIRTUAL_4T4R_' \
                                      f'OVERLAP_INDICATOR-1;'
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_ltelte,
-                                               i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_ltelte])
 
     def create_ho_lte2g(self):
         for i in self.__class__.lst_huawei:
@@ -295,15 +242,15 @@ class Huawei:
                                         f',GERANARFCN={i.Target_BCCH},NETWORKCOLOURCODE={i.Target_ncc},BASESTATIONC' \
                                         f'OLOURCODE={i.Target_bcc},CELLNAME="{i.Target_full_name}";'
                     self.ext_lte2g.append(f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_ext_lte2g,
-                                                                                                    i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_ext_lte2g])
 
                 if f'{i.Source_ENB}_{i.Source_ENB_CI}_{i.Target_BCCH}' not in self.arfcn_lte2g:
                     command_arfcn = f'ADD GERANNFREQGROUPARFCN:LOCALCELLID={i.Source_ENB_CI},BCCHGROUPID=0,GERANARFCN' \
                                     f'={i.Target_BCCH};'
                     self.ext_lte2g.append(f'{i.Source_ENB}_{i.Source_ENB_CI}_{i.Target_BCCH}')
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_arfcn,
-                                                                                                    i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_arfcn])
 
                 i.BLINDHOPRIORITY = '0'
                 if i.Source_full_name[:15] == i.Target_full_name[:15]:
@@ -311,8 +258,8 @@ class Huawei:
                 command_lte2g = f'ADD GERANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",LAC={i.Target_LAC},' \
                                 f'GERANCELLID={i.Target_Cell_ID},BLINDHOPRIORITY={i.BLINDHOPRIORITY},LOCALCELLNAME=' \
                                 f'"{i.Source_full_name}"+ ,NEIGHBOURCELLNAME="{i.Target_full_name}";'
-                rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_lte2g,
-                                                                                                i.Type_ho])
+                rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                           command_lte2g])
 
     def create_ho_2glte(self):
         for i in self.__class__.lst_huawei:
@@ -323,11 +270,11 @@ class Huawei:
                                         f'{i.Target_LAC},FREQ={i.Target_BCCH},PCID={i.Target_BSIC},' \
                                         f'EUTRANTYPE=FDD,OPNAME="MTS Ukraine";'
                     self.ext_2glte.append(f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [command_ext_2glte,
-                                                                                              i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho,
+                                               command_ext_2glte])
                 command_2glte = f'ADD GLTENCELL:IDTYPE=BYNAME,SRCLTENCELLNAME="{i.Source_full_name}"NBRLTENCELLNAME="' \
                                 f'{i.Target_full_name}",SPTRESEL=SUPPORT,SPTRAPIDSEL=SUPPORT;'
-                rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [command_2glte, i.Type_ho])
+                rpdb_cls.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2glte])
 
     def create_ho_lte3g(self):
         for i in self.__class__.lst_huawei:
@@ -338,8 +285,8 @@ class Huawei:
                                         f',UTRANFDDTDDTYPE=UTRAN_FDD,RACCFGIND=CFG,RAC={i.Target_RAC},PSCRAMBCODE=' \
                                         f'{i.Target_BSIC},LAC={i.Target_LAC},CELLNAME="{i.Target_full_name}";'
                     self.ext_lte3g_lst.append(f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_ext_lte3g,
-                                                                                                   i.Type_ho])
+                    rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                               command_ext_lte3g])
                 BLINDHOPRIORITY_part = 'LOCALCELLNAME='
                 if i.Source_full_name[:15] == i.Target_full_name[:15]:
                     BLINDHOPRIORITY_part = 'BLINDHOPRIORITY=32,OVERLAPIND=YES,NCELLMEASPRIORITY=128, + LOCALCELLNAME='
@@ -347,8 +294,34 @@ class Huawei:
                 command_lte3g = f'ADD UTRANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",RNCID=' \
                                 f'{i.Target_BSC},CELLID={i.Target_Cell_ID},{BLINDHOPRIORITY_part}"' \
                                 f'{i.Source_full_name}",NEIGHBOURCELLNAME="{i.Target_full_name}";'
-                rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [command_lte3g,
-                                                                                                i.Type_ho])
+                rpdb_cls.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                                           command_lte3g])
 
+    def sorting_for_xlsx(self):
+        self.__class__.Huawei_from_LTE = rpdb_cls.command_sort(self.__class__.Huawei_from_LTE, [
+            'ADD EUTRANEXTERNALCELL', 'ADD EUTRANINTRAFREQNCELL', 'ADD EUTRANINTERFREQNCELL', 'ADD GERANEXTERNALCELL',
+            'ADD GERANNFREQGROUPARFCN', 'ADD GERANNCELL', 'ADD UTRANEXTERNALCELL', 'ADD UTRANNCELL'])
 
+        self.__class__.Huawei_from_2G = rpdb_cls.command_sort(self.Huawei_from_2G, [
+            'ADD GEXT2GCELL', 'ADD G2GNCELL', 'ADD GEXT3GCELL', 'ADD G3GNCELL', 'ADD GEXTLTECELL', 'ADD GLTENCEL'])
+
+        self.__class__.Huawei_from_3G = rpdb_cls.command_sort(self.Huawei_from_3G, [
+            'ADD UEXT3GCELL', 'ADD UINTRAFREQNCELL', 'ADD UINTERFREQNCELL', 'ADD UEXT2GCELL', 'ADD U2GNCELL'])
+
+    def create_xlsx_file(self):
+        wb = openpyxl.Workbook()
+        xlsx_path = f'{self.path_folder}/___HUAWEI___{self.main_bs}.xlsx'
+
+        wb.save(xlsx_path)
+        with pd.ExcelWriter(xlsx_path, engine='openpyxl', mode='w') as writer:
+            if len(self.__class__.Huawei_from_2G) > 0:
+                df_2g = pd.DataFrame(self.__class__.Huawei_from_2G)
+                df_2g.to_excel(writer, sheet_name='2G')
+            if len(self.__class__.Huawei_from_3G) > 0:
+                df_3g = pd.DataFrame(self.__class__.Huawei_from_3G)
+                df_3g.to_excel(writer, sheet_name='3G')
+
+            if len(self.__class__.Huawei_from_LTE) > 0:
+                df_lte = pd.DataFrame(self.__class__.Huawei_from_LTE)
+                df_lte.to_excel(writer, sheet_name='LTE')
 

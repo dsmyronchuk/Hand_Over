@@ -1,0 +1,9 @@
+CREATE:MOC="UtranRelation",MOI="SubNetwork={{SAA}},MEID={{MEID}},ENBFunctionFDD={{Source_ENB}},EUtranCellFDD={{Source_CI_256}},UtranRelation={{UtranRelation}}",ATTRIBUTES="refExternalUtranCellFDD=\"SubNetwork={{SAA}},MEID={{MEID}},ConfigSet=0,ENBFunctionFDD={{Source_ENB}},ExternalUtranCellFDD={{ExternalUtranCellFDD}}\",userLabel={{Target_Name}},ratShareCover=1,refExternalUtranCellTDD=null,whiteListNbrInd=0,isRatESCoveredBy=0,isRemoveAllowed=1,isHOSupport=0,UtranRelation={{UtranRelation}},isAnrCreated=0",EXTENDS="";
+
+{{SAA}}
+{{MEID}}
+{{Source_ENB}}
+{{Source_CI_256}}
+{{UtranRelation}}
+{{ExternalUtranCellFDD}}
+{{Target_Name}}
