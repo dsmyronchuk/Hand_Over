@@ -1,4 +1,4 @@
-from rows_initialization import rpdb_cls
+from rows_initialization import primary
 import pandas as pd
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -33,7 +33,7 @@ class NSN:
             self.create_csv_2g3g()
 
     def search_nsn(self):
-        for i in rpdb_cls.lst_row:
+        for i in primary.lst_row:
             if i.Source_vendor == 'Huawei':
                 self.__class__.lst_nsn.append(i)
 
@@ -103,138 +103,138 @@ class NSN:
 
     def create_xml_3g(self):
         # словари для managedObject
-        UMTSclassADJS = {'class': 'UMTSclassADJS'}
-        UMTSclassADJI = {'class': 'UMTSclassADJI'}
-        UMTSclassADJG = {'class': 'UMTSclassADJG'}
+        umt_sclass_adjs = {'class': 'UMTSclassADJS'}
+        umt_sclass_adji = {'class': 'UMTSclassADJI'}
+        umt_sclass_adjg = {'class': 'UMTSclassADJG'}
 
         # создание xml
         new = ET.Element('raml', version='2.1', xmlns='raml21.xsd')
-        cmData = ET.SubElement(new, 'cmData', xmlns="", type='plan', scope='changes', name='ADJx_KIE_2_WBTS_INDOORS')
-        header = ET.SubElement(cmData, 'header')
+        cm_data = ET.SubElement(new, 'cmData', xmlns="", type='plan', scope='changes', name='ADJx_KIE_2_WBTS_INDOORS')
+        header = ET.SubElement(cm_data, 'header')
         log = ET.SubElement(header, 'log', dateTime='29.09.2021', action="created", appInfo="NSN NetAct Plan Editor")
         log.text = 'No description'
 
         for i in self.__class__.NSN_3G3G_adjs:
-            managedObject = ET.SubElement(cmData, 'managedObject', UMTSclassADJS, operation="create",version="mcRNC18")
-            p1 = ET.SubElement(managedObject, 'p', name="SourceCI")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjs, operation="create",version="mcRNC18")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceRncId")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
             p1.text = i[1]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsCI")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsCI")
             p1.text = i[2]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsCPICHTxPwr")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsCPICHTxPwr")
             p1.text = '330'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsLAC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsLAC")
             p1.text = i[3]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsRAC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsRAC")
             p1.text = i[4]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsRNCid")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsRNCid")
             p1.text = i[5]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsScrCode")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsScrCode")
             p1.text = i[6]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsSIB")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsSIB")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="NrtHopsIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="NrtHopsIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="RtHopsIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="RtHopsIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjsEcNoOffset")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjsEcNoOffset")
             p1.text = '0'
-            p1 = ET.SubElement(managedObject, 'p', name="HSDPAHopsIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="HSDPAHopsIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="RTWithHSDPAHopsIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="RTWithHSDPAHopsIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="SRBHopsIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="SRBHopsIdentifier")
             p1.text = '0'
 
         for i in self.__class__.NSN_3G3G_adji:
-            managedObject = ET.SubElement(cmData, 'managedObject', UMTSclassADJI, operation="create",version="mcRNC18")
-            p1 = ET.SubElement(managedObject, 'p', name="SourceCI")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adji, operation="create",version="mcRNC18")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceRncId")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
             p1.text = i[1]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiCI")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiCI")
             p1.text = i[2]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiCPICHTxPwr")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiCPICHTxPwr")
             p1.text = '330'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiLAC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiLAC")
             p1.text = i[3]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiRAC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiRAC")
             p1.text = i[4]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiRNCid")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiRNCid")
             p1.text = i[5]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiScrCode")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiScrCode")
             p1.text = i[6]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiSIB")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiSIB")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="NrtHopiIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="NrtHopiIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="RtHopiIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="RtHopiIdentifier")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiEcNoOffsetNCHO")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiEcNoOffsetNCHO")
             p1.text = '12'
-            p1 = ET.SubElement(managedObject, 'p', name="BlindHOTargetCell")
+            p1 = ET.SubElement(managed_object, 'p', name="BlindHOTargetCell")
             p1.text = '0'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiHandlingBlockedCellSLHO")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiHandlingBlockedCellSLHO")
             p1.text = '0'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjiUARFCN")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjiUARFCN")
             p1.text = i[7]
 
         for i in self.__class__.NSN_3G2G:
-            managedObject = ET.SubElement(cmData, 'managedObject', UMTSclassADJG, operation="create",version="mcRNC18")
-            p1 = ET.SubElement(managedObject, 'p', name="SourceCI")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjg, operation="create",version="mcRNC18")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceRncId")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
             p1.text = i[1]
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="SourceMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="SourceMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgCI")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgCI")
             p1.text = i[2]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgTxPwrMaxRACH")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgTxPwrMaxRACH")
             p1.text = '30'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgLAC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgLAC")
             p1.text = i[3]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgMCC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgMCC")
             p1.text = '255'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgMNC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgMNC")
             p1.text = '01'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgBandIndicator")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgBandIndicator")
             p1.text = '0'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgBCC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgBCC")
             p1.text = i[4]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgBCCH")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgBCCH")
             p1.text = i[6]
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgSIB")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgSIB")
             p1.text = '1'
-            p1 = ET.SubElement(managedObject, 'p', name="NrtHopgIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="NrtHopgIdentifier")
             p1.text = '2'
-            p1 = ET.SubElement(managedObject, 'p', name="RtHopgIdentifier")
+            p1 = ET.SubElement(managed_object, 'p', name="RtHopgIdentifier")
             p1.text = '2'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgTxPwrMaxTCH")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgTxPwrMaxTCH")
             p1.text = '30'
-            p1 = ET.SubElement(managedObject, 'p', name="AdjgNCC")
+            p1 = ET.SubElement(managed_object, 'p', name="AdjgNCC")
             p1.text = i[5]
-            p1 = ET.SubElement(managedObject, 'p', name="ADJGType")
+            p1 = ET.SubElement(managed_object, 'p', name="ADJGType")
             p1.text = '0'
-            p1 = ET.SubElement(managedObject, 'p', name="ADJGChangeOrigin")
+            p1 = ET.SubElement(managed_object, 'p', name="ADJGChangeOrigin")
             p1.text = '2'
 
         xml_string = ET.tostring(new).decode(errors='ignore')

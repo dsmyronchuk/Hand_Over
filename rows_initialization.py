@@ -4,7 +4,7 @@ import datetime
 import os
 
 
-class rpdb_cls:
+class primary:
     lst_row = []
     duplicate_check = []
     path_directory = ''
@@ -13,7 +13,7 @@ class rpdb_cls:
                         '62526': '230', '22207': '503', '22279': '513', '402': '523', '22349': '533', '20705': '543',
                         '20704': '553', '20703': '563', '61602': '112', '61526': '102', '22461': '1503',
                         '22623': '1513', '368': '1543', '366': '1703', '15396': '1723', '360': '1903', '365': '1923',
-                        '356': '1862', '22178': '1872', '260': '1340', '22832': '1380'}
+                        '356': '1862', '22178': '1872', '260': '1340', '22832': '1380', '377': '1608'}
 
     def __init__(self, row):
         self.Source_BSC = row[0]
@@ -47,11 +47,11 @@ class rpdb_cls:
         if self.Source_BCCH in (1700, 2900, 3676):
             self.Source_ENB = str(self.Source_Cell_ID)[:6]
             self.Source_ENB_CI = str(self.Source_Cell_ID)[-2:]
-            self.Source_CI_256 = (str(self.Source_Cell_ID)[:6] * 256) + str(self.Source_Cell_ID)[-2:]
+            self.Source_CI_256 = (int(str(self.Source_Cell_ID)[:6]) * 256) + int(str(self.Source_Cell_ID)[-2:])
         if self.Target_BCCH in (1700, 2900, 3676):
             self.Target_ENB = str(self.Target_Cell_ID)[:6]
             self.Target_ENB_CI = str(self.Target_Cell_ID)[-2:]
-            self.Target_CI_256 = (str(self.Target_Cell_ID)[:6] * 256) + str(self.Target_Cell_ID)[-2:]
+            self.Target_CI_256 = (int(str(self.Target_Cell_ID)[:6]) * 256) + int(str(self.Target_Cell_ID)[-2:])
 
         self.Source_vendor = self.check_vendor(self.Source_BSC)
         self.Target_vendor = self.check_vendor(self.Target_BSC)
@@ -60,7 +60,7 @@ class rpdb_cls:
 
         # Проверка на дубликаты и добавление в список обьектов
         main_values = [self.Source_BSC, self.Source_Cell_ID, self.Source_LAC,
-                      self.Target_BSC, self.Target_Cell_ID, self.Target_LAC]
+                       self.Target_BSC, self.Target_Cell_ID, self.Target_LAC]
         if main_values not in self.__class__.duplicate_check:
             self.__class__.lst_row.append(self)
             self.__class__.duplicate_check.append(main_values)
@@ -69,9 +69,9 @@ class rpdb_cls:
         if bsc in (252, 322, 338, 358, 432, 452, 732, 822, 832, 922, 1252, 1322, 1432):
             return 'ZTE'
 
-        elif bsc in (210, 220, 230, 1340, 1380, 503, 513, 523, 533, 543, 553,
+        elif bsc in (210, 220, 230, 1340, 1380, 503, 513, 523, 533, 543, 553, 1608,
                      563, 703, 713, 723, 733, 743, 753, 903, 913, 923, 933, 1503,
-                     1513, 1543, 1703, 1723, 1903, 1923, 1862, 1872, 112, 102, 528):
+                     1513, 1543, 1703, 1723, 1903, 1923, 1862, 1872, 112, 102, 528,):
             return 'Huawei'
 
         elif bsc in (801, 811, 821, 831, 841, 851, 861, 871, 881, 891, 901, 911, 941, 921, 931,
@@ -157,10 +157,10 @@ class rpdb_cls:
 
     @staticmethod
     def get_lst_3column(path, column_1, column_2, column_3):
-        sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
+        sql_table = pd.read_sql(path, primary.connect_sql())
         if column_1 == 'fdn':
             sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-            sql_table[column_1] = sql_table[column_1].map(rpdb_cls.index_BSC_Huawei).fillna(sql_table[column_1])
+            sql_table[column_1] = sql_table[column_1].map(primary.index_BSC_Huawei).fillna(sql_table[column_1])
         sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
                                                    axis=1)
         out_lst = [i for i in sql_table['correct_key']]
@@ -169,19 +169,19 @@ class rpdb_cls:
     # функция для коннекта к SQL и вывода словаря ключ: 3 колонки; значение: 4 колонка
     @staticmethod
     def get_dct_4column(path, column_1, column_2, column_3, column_4, type):
-        sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
+        sql_table = pd.read_sql(path, primary.connect_sql())
 
         if type == '3key_1value':       # Используется в Huawei
             if column_1 == 'fdn':
                 sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-                sql_table[column_1] = sql_table[column_1].map(rpdb_cls.index_BSC_Huawei).fillna(sql_table[column_1])
+                sql_table[column_1] = sql_table[column_1].map(primary.index_BSC_Huawei).fillna(sql_table[column_1])
             sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
                                                        axis=1)
             out_dict = {row['correct_key']: row[column_4] for index, row in sql_table.iterrows()}
             return out_dict     # пример - {'BSC_CI_LAC': 'Ext_ID'}
 
         if type == '2key_2value':      # Используется в ZTE
-            sql_table = pd.read_sql(path, rpdb_cls.connect_sql())
+            sql_table = pd.read_sql(path, primary.connect_sql())
             sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}', axis=1)
             out_dict = {row['correct_key']: [row[column_3], row[column_4]] for index, row in sql_table.iterrows()}
             return out_dict  # пример - {'BSC_CI': ['BTS_ID', 'Gsm_Cell_ID'}

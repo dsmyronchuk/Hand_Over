@@ -1,4 +1,4 @@
-from rows_initialization import rpdb_cls
+from rows_initialization import primary
 from jinja2 import Template
 import sql_request
 import pandas as pd
@@ -35,7 +35,7 @@ class ZTE:
         self.create_xlsx_file()             # Создание итогового xlsx файла и запись в него команд
 
     def search_zte(self):
-        for i in rpdb_cls.lst_row:
+        for i in primary.lst_row:
             if i.Source_vendor == 'ZTE':
                 self.__class__.lst_zte.append(i)
                 i.info_column = f'{i.Source_full_name}({i.Source_Cell_ID}) >>> {i.Target_full_name}({i.Target_Cell_ID})'
@@ -104,13 +104,13 @@ class ZTE:
     def add_2g_parametr_btsid(self):
         # выкачиваю и обрабатываю таблицу GGsmCell
         path_gsm_cell = sql_request.ZTE_gsm_cell
-        self.gsm_cell_dict = rpdb_cls.get_dct_4column(path_gsm_cell, 'MEID', 'cellIdentity',
-                                                      'GBtsSiteManager', 'GGsmCell', '2key_2value')
+        self.gsm_cell_dict = primary.get_dct_4column(path_gsm_cell, 'MEID', 'cellIdentity',
+                                                     'GBtsSiteManager', 'GGsmCell', '2key_2value')
 
         # Если сота создана сегодня, её не будет в БД, по этому данные нужно ввести вручную
         for i in self.__class__.lst_zte:
             if i.Source_BCCH < 950 and f'{i.Source_BSC}_{i.Source_Cell_ID}' not in self.gsm_cell_dict:
-                inp = input(f'Введите 2G ID, 2GCell ID для соты {i.Source_Site_Name}, {i.Source_Cell_ID}: ').split(',')
+                inp = input(f'Введите 2G ID, 2GCell ID для соты {i.Source_Site_Name}({i.Source_Cell_ID}): ').split(',')
                 inp[1] = inp[1].strip()     # убираю пробел, если пользователь ввёл данные с пробелом
                 self.gsm_cell_dict[f'{i.Source_BSC}_{i.Source_Cell_ID}'] = inp
 
@@ -128,7 +128,7 @@ class ZTE:
     def add_lte_parametr(self):
         # SubNetwork; MEID
         path_ne = sql_request.ZTE_ne_sdr
-        sql_table = pd.read_sql(path_ne, rpdb_cls.connect_sql())
+        sql_table = pd.read_sql(path_ne, primary.connect_sql())
         dct = {row['Name']: [row['SubNetwork'], row['MEID']] for index, row in sql_table.iterrows()}
 
         for i in self.__class__.lst_zte:
@@ -136,95 +136,100 @@ class ZTE:
                 i.SubNetwork = dct[i.Source_Site_Name[:11]][0]
                 i.MEID = dct[i.Source_Site_Name[:11]][1]
             # Если БС создана сегодня, то её не будет в БД, данные нужно ввести вручную
-            elif i.Source_BCCH in (1700, 2900, 3676) and i.Source_Site_Name[:11] in sql_table:
-                i.SubNetwork = input(f'Введите SubNetwork для соты {i.Source_full_name}: ')
-                i.MEID = input(f'Введите MEID для соты {i.Source_full_name}: ')
+            elif i.Source_BCCH in (1700, 2900, 3676) and i.Source_Site_Name[:11] not in sql_table:
+                user_SubNetwork = input(f'Введите SubNetwork для соты {i.Source_full_name}: ')
+                user_MEID = input(f'Введите MEID для соты {i.Source_full_name}: ')
+
+                i.SubNetwork = user_SubNetwork
+                i.MEID = user_MEID
+
+                # добавляю в словарь для будущих строк с этой БС
+                dct[i.Source_Site_Name[:11]] = [user_SubNetwork, user_MEID]
 
         # Target LTE Spectr (MHz)
         path_lte_cell = sql_request.ZTE_lte_cell
-        dct_lte_cell = rpdb_cls.get_dct_4column(path_lte_cell,  'ENBFunctionFDD', 'cellLocalId', 'Name',
-                                                'bandWidthDl', '3key_1value')
+        dct_lte_cell = primary.get_dct_4column(path_lte_cell, 'ENBFunctionFDD', 'cellLocalId', 'Name',
+                                               'bandWidthDl', '3key_1value')
         for i in self.__class__.lst_zte:
-            if i.Target_BCCH in (1700, 2900, 3676):
-                key = f'{i.Source_ENB}_{i.Source_ENB_CI}_{i.Source_Site_Name[:11]}'
+            if i.Type_ho == 'LTE>LTE':
+                key = f'{i.Target_ENB}_{i.Target_ENB_CI}_{i.Target_Site_Name[:11]}'
                 if key in dct_lte_cell:
                     i.Target_MHz = dct_lte_cell[key]
                 else:  # Если БС создана сегодня, то её не будет в БД, данные нужно ввести вручную
-                    i.Target_MHz = input(f'Введите полосу MHz для LTE соты  '
-                                         f'3MHz  - 1'
-                                         f'15Mhz - 4'
-                                         f'20Mhz - 5'
-                                         f'{i.Target_full_name}: ')
+                    print(f'Введите спектр полосы (MHz) для LTE соты {i.Target_full_name}')
+                    user_mhz = input('(3, 5, 15, 20): ')
+                    i.Target_MHz = user_mhz
+                    dct_lte_cell[key] = user_mhz        # добавляю в словарь для будущих строк с этой БС
 
     def table_functions_relation(self):
         # Обработка таблицы 2G2G_relation ( для GGsmRelationSeq )
         path_2g2g_relation = sql_request.ZTE_relation_index_2g2g
-        self.index_2g2g = rpdb_cls.get_dct_4column(path_2g2g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
-                                                   'GGsmRelationSeq', '3key_1value')
+        self.index_2g2g = primary.get_dct_4column(path_2g2g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
+                                                  'GGsmRelationSeq', '3key_1value')
         for k, v in self.index_2g2g.items():  # передываю цельную строку в список строк
             self.index_2g2g[k] = v.split(',')
 
         # Обработка таблицы 2G3G_relation ( для GGsmRelationSeq )
         path_2g3g_relation = sql_request.ZTE_relation_index_2g3g
-        self.index_2g3g = rpdb_cls.get_dct_4column(path_2g3g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
-                                                   'GUtranRelationSeq', '3key_1value')
+        self.index_2g3g = primary.get_dct_4column(path_2g3g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
+                                                  'GUtranRelationSeq', '3key_1value')
         for k, v in self.index_2g3g.items():  # передываю цельную строку в список строк
             self.index_2g3g[k] = v.split(',')
 
         # обработка таблицы LTELTE_relation
         path_4g4g_relation = sql_request.ZTE_relation_index_4g4g
-        self.index_4g4g = rpdb_cls.get_dct_4column(path_4g4g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                   'EUtranRelation_index', '3key_1value')
+        self.index_4g4g = primary.get_dct_4column(path_4g4g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
+                                                  'EUtranRelation_index', '3key_1value')
         for k, v in self.index_4g4g.items():  # передываю цельную строку в список строк
             self.index_4g4g[k] = v.split(',')
 
         # обработка таблицы LTE2G_relation
         path_4g2g_relation = sql_request.ZTE_relation_index_4g2g
-        self.index_4g2g = rpdb_cls.get_dct_4column(path_4g2g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                   'GsmRelation_index', '3key_1value')
+        self.index_4g2g = primary.get_dct_4column(path_4g2g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
+                                                  'GsmRelation_index', '3key_1value')
         for k, v in self.index_4g2g.items():  # передываю цельную строку в список строк
             self.index_4g2g[k] = v.split(',')
 
         # обработка таблицы LTE3G_relation
         path_4g3g_relation = sql_request.ZTE_relation_index_4g3g
-        self.index_4g3g = rpdb_cls.get_dct_4column(path_4g3g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                   'UtranRelation_index', '3key_1value')
+        self.index_4g3g = primary.get_dct_4column(path_4g3g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
+                                                  'UtranRelation_index', '3key_1value')
         for k, v in self.index_4g3g.items():  # передываю цельную строку в список строк
             self.index_4g3g[k] = v.split(',')
 
     def table_functions_external(self):
         # обработка таблиц EXT 2G2G
         path_ext2g2g = sql_request.ZTE_ext_2g2g
-        self.ext2g2g = rpdb_cls.get_dct_4column(path_ext2g2g, 'MEID', 'cellIdentity', 'lac',
-                                                'GExternalGsmCell', '3key_1value')
+        self.ext2g2g = primary.get_dct_4column(path_ext2g2g, 'MEID', 'cellIdentity', 'lac',
+                                               'GExternalGsmCell', '3key_1value')
 
         # обработка таблиц EXT 2G3G
         path_ext2g3g = sql_request.ZTE_ext_2g3g
-        self.ext2g3g = rpdb_cls.get_dct_4column(path_ext2g3g, 'MEID', 'ci', 'lac',
-                                                'GExternalUtranCellFDD', '3key_1value')
+        self.ext2g3g = primary.get_dct_4column(path_ext2g3g, 'MEID', 'ci', 'lac',
+                                               'GExternalUtranCellFDD', '3key_1value')
 
         # обработка таблиц EXT 3G3G
         path_ext3g3g = sql_request.ZTE_ext_3g3g
-        self.ext3g3g = rpdb_cls.get_dct_4column(path_ext3g3g, 'MEID', 'cId', 'lac',
-                                                'UExternalUtranCellFDD', '3key_1value')
+        self.ext3g3g = primary.get_dct_4column(path_ext3g3g, 'MEID', 'cId', 'lac',
+                                               'UExternalUtranCellFDD', '3key_1value')
 
         # Обработка таблиц EXT 3G2G
         path_ext3g2g = sql_request.ZTE_ext_3g2g
-        self.ext3g2g = rpdb_cls.get_dct_4column(path_ext3g2g, 'MEID', 'cellIdentity', 'lac',
-                                                'UExternalGsmCell', '3key_1value')
+        self.ext3g2g = primary.get_dct_4column(path_ext3g2g, 'MEID', 'cellIdentity', 'lac',
+                                               'UExternalGsmCell', '3key_1value')
 
         # Обработка таблиц EXT LTELTE
         path_ext4g4g = sql_request.ZTE_ext_4g4g
-        self.ext4g4g = rpdb_cls.get_dct_4column(path_ext4g4g, 'SubNetwork', 'ENBFunctionFDD', 'Target_CI',
-                                                'ExternalEUtranCellFDD', '3key_1value')
+        self.ext4g4g = primary.get_dct_4column(path_ext4g4g, 'SubNetwork', 'ENBFunctionFDD', 'Target_CI',
+                                               'ExternalEUtranCellFDD', '3key_1value')
         # Обработка таблиц EXT LTE2G
         path_ext4g2g = sql_request.ZTE_ext_4g2g
-        self.ext4g2g = rpdb_cls.get_dct_4column(path_ext4g2g, 'SubNetwork', 'ENBFunctionFDD', 'cellIdentity',
-                                                'ExternalGsmCell', '3key_1value')
+        self.ext4g2g = primary.get_dct_4column(path_ext4g2g, 'SubNetwork', 'ENBFunctionFDD', 'cellIdentity',
+                                               'ExternalGsmCell', '3key_1value')
         # Обработка таблиц EXT LTE3G
         path_ext4g3g = sql_request.ZTE_ext_4g3g
-        self.ext4g3g = rpdb_cls.get_dct_4column(path_ext4g3g, 'SubNetwork', 'ENBFunctionFDD', 'cId',
-                                                'ExternalUtranCellFDD', '3key_1value')
+        self.ext4g3g = primary.get_dct_4column(path_ext4g3g, 'SubNetwork', 'ENBFunctionFDD', 'cId',
+                                               'ExternalUtranCellFDD', '3key_1value')
 
     def free_slot(self, obj_i):    # возврщатает свободный слот 129-192/0-31, и добавляет это значение в словарь
         key = ''
@@ -310,8 +315,8 @@ class ZTE:
                                                       NCellLayer=i.NCellLayer,
                                                       MacroMicroHoThs=i.MacroMicroHoThs,
                                                       HoPriority=i.HoPriority)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_self_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_self_ho,
+                                                                                     i.info_column])
 
             if i.Type_ho == '2G>2G' and i.Source_BSC != i.Target_BSC and key__bsc_ci_lac not in self.ext2g2g:
                 command_external_2g2g = temp_external.render(Source_BSC=i.Source_BSC,
@@ -325,8 +330,8 @@ class ZTE:
                                                              Target_BCCH=i.Target_BCCH,
                                                              MsTxPwrMax=i.MsTxPwrMax,
                                                              MsTxPwrMaxCch=i.MsTxPwrMaxCch)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_external_2g2g,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_external_2g2g,
+                                                                                     i.info_column])
 
             if i.Type_ho == '2G>2G' and i.Source_BSC != i.Target_BSC and key__bsc_ci_lac in self.ext2g2g:
                 command_another_ho = temp_another_ho.render(Source_BSC=i.Source_BSC,
@@ -341,8 +346,8 @@ class ZTE:
                                                             NCellLayer=i.NCellLayer,
                                                             MacroMicroHoThs=i.MacroMicroHoThs,
                                                             HoPriority=i.HoPriority)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_another_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_another_ho,
+                                                                                     i.info_column])
 
     def create_ho_2g3g(self):
         temp_ho = Template(open('zte_template/2g3g_temp_ho.txt').read())
@@ -360,8 +365,8 @@ class ZTE:
                                                       Target_Name=i.Target_full_name,
                                                       Target_Cell_ID=i.Target_Cell_ID,
                                                       Target_BSIC=i.Target_BSIC)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, comand_extrnal,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, comand_extrnal,
+                                                                                     i.info_column])
 
             if i.Type_ho == '2G>3G':
                 command_ho = temp_ho.render(Source_BSC=i.Source_BSC,
@@ -371,8 +376,8 @@ class ZTE:
                                             GUtranRelation=self.free_slot(i),
                                             Source_Cell_ID=i.Source_Cell_ID,
                                             Target_Cell_ID=i.Target_Cell_ID)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_ho,
+                                                                                     i.info_column])
 
     def create_ho_3g3g(self):
         temp_self_ho = Template(open('zte_template/3g3g_temp__RNC=RNC.txt').read())
@@ -392,8 +397,8 @@ class ZTE:
                                                         Target_Name=i.Target_full_name,
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_BSIC=i.Target_BSIC)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
+                                                                                     i.info_column])
 
             if i.Type_ho == '3G>3G' and i.Source_BSC != i.Target_BSC:
                 command_another_ho = temp_another_ho.render(Source_BSC=i.Source_BSC,
@@ -401,8 +406,8 @@ class ZTE:
                                                             Target_Name=i.Target_full_name,
                                                             UUtranRelation=f'{i.Target_BSC}{i.Target_Cell_ID}',
                                                             Ext_BTS_index=self.ext3g3g[key__bsc_ci_lac])
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_another_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_another_ho,
+                                                                                     i.info_column])
 
             if i.Type_ho == '3G>3G' and i.Source_BSC == i.Target_BSC:
                 command_self_ho = temp_self_ho.render(Source_BSC=i.Source_BSC,
@@ -410,8 +415,8 @@ class ZTE:
                                                       UUtranRelation=f'{i.Target_BSC}{i.Target_Cell_ID}',
                                                       Target_Name=i.Target_full_name,
                                                       Target_Cell_ID=i.Target_Cell_ID)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_self_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_self_ho,
+                                                                                     i.info_column])
 
     def create_ho_3g2g(self):
         temp_ho = Template(open('zte_template/3g2g_temp_ho.txt').read())
@@ -429,8 +434,8 @@ class ZTE:
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_LAC=i.Target_LAC,
                                                         Target_RAC=i.Target_RAC)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
+                                                                                     i.info_column])
 
             if i.Type_ho == '3G>2G':
                 command_ho = temp_ho.render(Source_BSC=i.Source_BSC,
@@ -438,8 +443,8 @@ class ZTE:
                                             UGsmRelation=f'{i.Target_BSC}{i.Target_Cell_ID}',
                                             Target_Name=i.Target_full_name,
                                             Ext_BTS_index=self.ext3g2g[key__bsc_ci_lac])
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_ho,
-                                                                                      i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_ho,
+                                                                                     i.info_column])
 
     def create_ho_4g4g(self):
         temp_self_ho = Template(open('zte_template/4g4g_temp_self_bs.txt').read())
@@ -462,8 +467,8 @@ class ZTE:
                                                         Target_TAC=i.Target_LAC,
                                                         Target_MHZ=i.Target_MHz,
                                                         Target_ENB=i.Target_ENB)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
+                                                                                      i.info_column])
 
             if i.Type_ho == 'LTE>LTE' and i.Source_Site_Name != i.Target_Site_Name:
                 command_another_ho = temp_another_ho.render(SAA=i.SubNetwork,
@@ -473,8 +478,8 @@ class ZTE:
                                                             EUtranRelation=self.free_slot(i),
                                                             Target_Name=i.Target_full_name,
                                                             Ext_index=self.ext4g4g[key])
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_another_ho,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_another_ho,
+                                                                                      i.info_column])
 
             if i.Type_ho == 'LTE>LTE' and i.Source_Site_Name == i.Target_Site_Name:
                 command_self_ho = temp_self_ho.render(SAA=i.SubNetwork,
@@ -484,8 +489,8 @@ class ZTE:
                                                       Target_CI_256=i.Target_CI_256,
                                                       EUtranRelation=self.free_slot(i),
                                                       Target_Name=i.Target_full_name)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_self_ho,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_self_ho,
+                                                                                      i.info_column])
 
     def create_ho_4g2g(self):
         temp_ho = Template(open('zte_template/4g2g_temp_ho.txt').read())
@@ -506,19 +511,19 @@ class ZTE:
                                                         Target_ncc=i.Target_ncc,
                                                         Target_bcc=i.Target_bcc,
                                                         Target_RAC=i.Target_RAC)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
+                                                                                      i.info_column])
 
-                if i.Type_ho == 'LTE>2G':
-                    command_ho = temp_ho.render(SAA=i.SubNetwork,
-                                                MEID=i.MEID,
-                                                Source_ENB=i.Source_ENB,
-                                                Source_CI_256=i.Source_CI_256,
-                                                GsmRelation=self.free_slot(i),
-                                                Target_Name=i.Target_full_name,
-                                                External_index=self.ext4g2g[key])
-                    rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
-                                                                                           i.info_column])
+            if i.Type_ho == 'LTE>2G':
+                command_ho = temp_ho.render(SAA=i.SubNetwork,
+                                            MEID=i.MEID,
+                                            Source_ENB=i.Source_ENB,
+                                            Source_CI_256=i.Source_CI_256,
+                                            GsmRelation=self.free_slot(i),
+                                            Target_Name=i.Target_full_name,
+                                            External_index=self.ext4g2g[key])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
+                                                                                      i.info_column])
 
     def create_ho_4g3g(self):
         temp_ho = Template(open('zte_template/4g3g_temp_ho.txt').read())
@@ -541,8 +546,8 @@ class ZTE:
                                                         Target_BSC=i.Target_BSC,
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_RAC=i.Target_RAC)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
+                                                                                      i.info_column])
 
             if i.Type_ho == 'LTE>3G':
                 command_ho = temp_ho.render(SAA=i.SubNetwork,
@@ -552,16 +557,16 @@ class ZTE:
                                             UtranRelation=self.free_slot(i),
                                             ExternalUtranCellFDD=self.ext4g3g[key],
                                             Target_Name=i.Target_full_name)
-                rpdb_cls.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
-                                                                                       i.info_column])
+                primary.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
+                                                                                      i.info_column])
 
     def sorting_for_xlsx(self):
-        self.__class__.ZTE_from_2G = rpdb_cls.command_sort(self.__class__.ZTE_from_2G, [
+        self.__class__.ZTE_from_2G = primary.command_sort(self.__class__.ZTE_from_2G, [
             'MOC="GExternalGsmCell"', 'MOC="GGsmRelation"', 'MOC="GExternalUtranCellFDD"', 'MOC="GUtranRelation"'])
-        self.__class__.ZTE_from_3G = rpdb_cls.command_sort(self.__class__.ZTE_from_3G, [
+        self.__class__.ZTE_from_3G = primary.command_sort(self.__class__.ZTE_from_3G, [
             'CREATE:MOC="UExternalUtranCellFDD"', 'CREATE:MOC="UUtranRelation"',
             'CREATE:MOC="UExternalGsmCell"', 'CREATE:MOC="UGsmRelation"'])
-        self.__class__.ZTE_from_LTE = rpdb_cls.command_sort(self.__class__.ZTE_from_LTE, [
+        self.__class__.ZTE_from_LTE = primary.command_sort(self.__class__.ZTE_from_LTE, [
             'CREATE:MOC="ExternalEUtranCellFDD"', 'CREATE:MOC="EUtranRelation"', 'CREATE:MOC="ExternalGsmCell"',
             'CREATE:MOC="GsmRelation"', 'CREATE:MOC="ExternalUtranCellFDD"', 'CREATE:MOC="UtranRelation"'])
 
