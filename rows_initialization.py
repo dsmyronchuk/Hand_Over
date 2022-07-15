@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 import datetime
 import os
+import account_info
 
 
 class primary:
@@ -142,8 +143,8 @@ class primary:
 
     @staticmethod
     def connect_sql():
-       # sqlbd_vf_work = 'mysql+pymysql://Dmyronchuk:NoMercy2017!@172.20.186.42:3306'  # БД Войтыка
-        sqlbd_vf_work = 'mysql+pymysql://root:NoizeMc2011!@localhost:3306'     # Локальная БД на пк
+       # sqlbd_vf_work = account_info.vf_vd  # БД Войтыка
+        sqlbd_vf_work = account_info.local_bd     # Локальная БД на пк
         connsqlbd_vf_work = create_engine(sqlbd_vf_work)
         return connsqlbd_vf_work
 
