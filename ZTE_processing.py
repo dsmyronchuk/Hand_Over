@@ -308,6 +308,8 @@ class ZTE:
                                                       Source_BTS_ID=i.Source_BTS_ID,
                                                       Source_BTS_Cell=i.Source_BTS_Cell,
                                                       GGsmRelationSeq=self.free_slot(i),
+                                                      Source_Cell_Id=i.Source_Cell_ID,
+                                                      Target_Cell_Id=i.Target_Cell_ID,
                                                       Target_BTS_ID=i.Target_BTS_ID,
                                                       Target_BTS_Cell=i.Target_BTS_Cell,
                                                       RxLevMin=i.RxLevMin,
