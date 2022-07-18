@@ -143,8 +143,7 @@ class primary:
 
     @staticmethod
     def connect_sql():
-       # sqlbd_vf_work = account_info.vf_vd  # БД Войтыка
-        sqlbd_vf_work = account_info.local_bd     # Локальная БД на пк
+        sqlbd_vf_work = account_info.local_bd     # Коннект к БД
         connsqlbd_vf_work = create_engine(sqlbd_vf_work)
         return connsqlbd_vf_work
 

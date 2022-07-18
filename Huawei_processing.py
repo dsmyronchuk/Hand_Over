@@ -227,7 +227,7 @@ class Huawei:
                 if i.Source_BCCH != i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTERFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
-                                     f'{i.Source_full_name}+ ,NEIGHBOURCELLNAME={i.Target_full_name} + ,AGGREGATIONP' \
+                                     f'{i.Source_full_name} ,NEIGHBOURCELLNAME={i.Target_full_name} ,AGGREGATIONP' \
                                      f'ROPERTY=BlindScellCfg-1,OVERLAPINDICATOREXTENSION=VIRTUAL_4T4R_' \
                                      f'OVERLAP_INDICATOR-1;'
                     primary.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
@@ -257,7 +257,7 @@ class Huawei:
                     i.BLINDHOPRIORITY = '32'
                 command_lte2g = f'ADD GERANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",LAC={i.Target_LAC},' \
                                 f'GERANCELLID={i.Target_Cell_ID},BLINDHOPRIORITY={i.BLINDHOPRIORITY},LOCALCELLNAME=' \
-                                f'"{i.Source_full_name}"+ ,NEIGHBOURCELLNAME="{i.Target_full_name}";'
+                                f'"{i.Source_full_name}" ,NEIGHBOURCELLNAME="{i.Target_full_name}";'
                 primary.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                command_lte2g])
 
@@ -289,7 +289,7 @@ class Huawei:
                                                                                                    command_ext_lte3g])
                 blindhopriority_part = 'LOCALCELLNAME='
                 if i.Source_full_name[:15] == i.Target_full_name[:15]:
-                    blindhopriority_part = 'BLINDHOPRIORITY=32,OVERLAPIND=YES,NCELLMEASPRIORITY=128, + LOCALCELLNAME='
+                    blindhopriority_part = 'BLINDHOPRIORITY=32,OVERLAPIND=YES,NCELLMEASPRIORITY=128, LOCALCELLNAME='
 
                 command_lte3g = f'ADD UTRANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",RNCID=' \
                                 f'{i.Target_BSC},CELLID={i.Target_Cell_ID},{blindhopriority_part}"' \

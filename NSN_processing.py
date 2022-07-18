@@ -34,7 +34,7 @@ class NSN:
 
     def search_nsn(self):
         for i in primary.lst_row:
-            if i.Source_vendor == 'Huawei':
+            if i.Source_vendor == 'NSN':
                 self.__class__.lst_nsn.append(i)
 
     def create_ho_2g2g(self):
@@ -80,25 +80,23 @@ class NSN:
 
     def create_ho_3g2g(self):
         for i in self.__class__.lst_nsn:
-            #row_xml = []
             if i.Type_ho == '3G>2G':
                 row_xml = [str(int(i.Source_Cell_ID)), str(int(i.Source_BSC)), str(int(i.Target_Cell_ID)),
-                                str(int(i.Target_LAC)), str(i.Target_bcc), str(i.Target_ncc), str(int(i.Target_BCCH))]
+                           str(int(i.Target_LAC)), str(i.Target_bcc), str(i.Target_ncc), str(int(i.Target_BCCH))]
                 self.__class__.NSN_3G2G.append(row_xml)
 
     def create_ho_3g3g(self):
         for i in self.__class__.lst_nsn:
-            #row_xml = []
             if i.Type_ho == '3G>3G':
                 if i.Source_BCCH == i.Target_BCCH:
                     row_xml = [str(int(i.Source_Cell_ID)), str(int(i.Source_BSC)), str(int(i.Target_Cell_ID)),
-                                    str(int(i.Target_LAC)), str(int(i.Target_RAC)), str(int(i.Target_BSC)),
-                                    str(int(i.Target_BSIC))]
+                               str(int(i.Target_LAC)), str(int(i.Target_RAC)), str(int(i.Target_BSC)),
+                               str(int(i.Target_BSIC))]
                     self.__class__.NSN_3G3G_adjs.append(row_xml)
                 else:
                     row_xml = [str(int(i.Source_Cell_ID)), str(int(i.Source_BSC)), str(int(i.Target_Cell_ID)),
-                                    str(int(i.Target_LAC)), str(int(i.Target_RAC)), str(int(i.Target_BSC)),
-                                    str(int(i.Target_BSIC)), str(int(i.Target_BCCH))]
+                               str(int(i.Target_LAC)), str(int(i.Target_RAC)), str(int(i.Target_BSC)),
+                               str(int(i.Target_BSIC)), str(int(i.Target_BCCH))]
                     self.__class__.NSN_3G3G_adji.append(row_xml)
 
     def create_xml_3g(self):
@@ -115,7 +113,8 @@ class NSN:
         log.text = 'No description'
 
         for i in self.__class__.NSN_3G3G_adjs:
-            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjs, operation="create",version="mcRNC18")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjs, operation="create",
+                                           version="mcRNC18")
             p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
             p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
@@ -156,7 +155,8 @@ class NSN:
             p1.text = '0'
 
         for i in self.__class__.NSN_3G3G_adji:
-            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adji, operation="create",version="mcRNC18")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adji, operation="create",
+                                           version="mcRNC18")
             p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
             p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
@@ -197,7 +197,8 @@ class NSN:
             p1.text = i[7]
 
         for i in self.__class__.NSN_3G2G:
-            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjg, operation="create",version="mcRNC18")
+            managed_object = ET.SubElement(cm_data, 'managedObject', umt_sclass_adjg, operation="create",
+                                           version="mcRNC18")
             p1 = ET.SubElement(managed_object, 'p', name="SourceCI")
             p1.text = i[0]
             p1 = ET.SubElement(managed_object, 'p', name="SourceRncId")
@@ -239,18 +240,18 @@ class NSN:
 
         xml_string = ET.tostring(new).decode(errors='ignore')
         xml_prettyxml = minidom.parseString(xml_string).toprettyxml()
-        with open(f'{self.path_folder}\___NOKIA___{self.main_bs}_3G.xml', 'w') as xml_file:
+        with open(f'{self.path_folder}/___NOKIA___{self.main_bs}_3G.xml', 'w') as xml_file:
             xml_file.write(xml_prettyxml)
 
     def create_csv_2g2g(self):
         df_2g2g_csv = pd.DataFrame(self.__class__.NSN_2G2G, columns=['$operation', '$sourceCI', '$sourceLAC',
-                                                                     '$sourceMCC','$sourceMNC', '$targetCI',
-                                                                     '$targetLAC', '$targetMCC','$targetMNC',
+                                                                     '$sourceMCC', '$sourceMNC', '$targetCI',
+                                                                     '$targetLAC', '$targetMCC', '$targetMNC',
                                                                      '$templateName', 'frequencyBandInUse',
                                                                      'bcchFrequency', 'adjCellBsicBcc',
                                                                      'adjCellBsicNcc'])
 
-        path_2g2g_csv = f'{self.path_folder}\___NOKIA___{self.main_bs}_2G2G.csv'
+        path_2g2g_csv = f'{self.path_folder}/___NOKIA___{self.main_bs}_2G2G.csv'
         wb = openpyxl.Workbook()
         wb.save(path_2g2g_csv)
         df_2g2g_csv.to_csv(path_2g2g_csv, index=False)
@@ -261,12 +262,9 @@ class NSN:
                                                                      '$targetRNCId', '$targetMCC', '$targetMNC',
                                                                      '$templateName'])
 
-        path_2g3g_csv = f'{self.path_folder}\___NOKIA___{self.main_bs}_2G3G.csv'
+        path_2g3g_csv = f'{self.path_folder}/___NOKIA___{self.main_bs}_2G3G.csv'
         wb = openpyxl.Workbook()
         wb.save(path_2g3g_csv)
         df_2g3g_csv.to_csv(path_2g3g_csv, index=False)
-
-
-
 
 
