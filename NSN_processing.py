@@ -101,9 +101,9 @@ class NSN:
 
     def create_xml_3g(self):
         # словари для managedObject
-        umt_sclass_adjs = {'class': 'UMTSclassADJS'}
-        umt_sclass_adji = {'class': 'UMTSclassADJI'}
-        umt_sclass_adjg = {'class': 'UMTSclassADJG'}
+        umt_sclass_adjs = {'class': 'com.nsn.mcrnc:ADJS'}
+        umt_sclass_adji = {'class': 'com.nsn.mcrnc:ADJI'}
+        umt_sclass_adjg = {'class': 'com.nsn.mcrnc:ADJG'}
 
         # создание xml
         new = ET.Element('raml', version='2.1', xmlns='raml21.xsd')

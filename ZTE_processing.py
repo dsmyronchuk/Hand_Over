@@ -90,6 +90,12 @@ class ZTE:
                     i.earfcnUl = '1760'
                     i.earfcnDl = '1855'
 
+            if i.Type_ho =='LTE>2G':
+                if i.Target_BCCH in range(1, 124):
+                    i.freqBand = 6
+                if i.Target_BCCH in range(512, 885):
+                    i.freqBand = 9
+
             if i.Type_ho == 'LTE>3G':
                 if i.Target_BCCH == 10712:
                     i.uarfcnUl = 1952.4
@@ -510,6 +516,8 @@ class ZTE:
                                                         Target_Name=i.Target_full_name,
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_LAC=i.Target_LAC,
+                                                        freqBand=i.freqBand,
+                                                        Target_BCCH=i.Target_BCCH,
                                                         Target_ncc=i.Target_ncc,
                                                         Target_bcc=i.Target_bcc,
                                                         Target_RAC=i.Target_RAC)
