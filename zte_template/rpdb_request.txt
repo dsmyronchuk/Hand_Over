@@ -1,0 +1,19 @@
+SELECT TOP 1000 [BSC]
+,[CI]
+,[SAC]
+,[LAC]
+,[RAC]
+,[Site Name]
+,[Azimuth]
+,[N]
+,[E]
+,[Tilt]
+,[BSIC]
+,[Channel]
+,[PCI]
+,[RSI]
+,[BCCH] =1
+,[Id_Site]
+FROM [rpdb].[dbo].[vExpSiemensFP]
+where [Site Name] like '{{user_bs}}_%' and BCCH = 1
+ORDER BY [SAC] ASC, [CI] ASC, [BCCH] ASC

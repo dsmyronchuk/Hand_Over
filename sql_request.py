@@ -88,29 +88,6 @@ Huawei_lte_oss_name = 'SELECT ENODEBFUNCTIONNAME, CELLID, DLEARFCN, CELLNAME FRO
 
 Huawei_ne_oss_name = 'SELECT NAME FROM`parse_huawei`.`BBU_BTS3900NE`'
 
-#MS_rpdb = f"""
-#SELECT TOP 1000 [BSC]
-#,[CI]
-#,[SAC]
-#,[LAC]
-#,[RAC]
-#,[Site Name]
-#,[Azimuth]
-#,[N]
-#,[E]
-#,[Tilt]
-#,[BSIC]
-#,[Channel]
-#,[PCI]
-#,[RSI]
-#,CASE WHEN [BCCH] =1
-#THEN 'ИСТИНА'
-#ELSE 'ЛОЖЬ'
-#END [BCCH]
-#,[Id_Site]
-#FROM [rpdb].[dbo].[vExpSiemensFP]
-#where [Site Name] like '{input('Введите имя БС: ').replace(' ', '_')}_%' and BCCH = 1
-#ORDER BY [SAC] ASC, [CI] ASC, [BCCH] ASC
-#"""
+
 
 

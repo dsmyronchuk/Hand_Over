@@ -207,27 +207,28 @@ class Huawei:
     def create_ho_ltelte(self):
         for i in self.__class__.lst_huawei:
             if i.Type_ho == 'LTE>LTE':
-                if f'{i.Source_Site_Name}_{i.Target_ENB}_{i.Target_ENB_CI}' not in self.ext_ltelte_lst:
+                key = f'{i.Source_Site_Name}_{i.Target_ENB}_{i.Target_ENB_CI}'
+                if key not in self.ext_ltelte_lst and i.Source_BSC != i.Target_BSC:
                     command_ext_ltelte = f'ADD EUTRANEXTERNALCELL:MCC="255",MNC="01",ENODEBID={i.Target_ENB},CELLID=' \
                                          f'{i.Target_ENB_CI},DLEARFCN={i.Target_BCCH},ULEARFCNCFGIND=NOT_CFG,PHYCEL' \
-                                         f'LID={i.Target_BSIC},TAC={i.Target_LAC},CELLNAME={i.Target_full_name},NCL' \
+                                         f'LID={i.Target_BSIC},TAC={i.Target_LAC},CELLNAME="{i.Target_full_name}",NCL' \
                                          f'UPDATEMODE=MFBI_UPDATE_MODE-1,SUPPORTEMTCFLAG=BOOLEAN_FALSE,AGGREGATIONAT' \
                                          f'TRIBUTE=MASTER_PLMN_RESERVED_FLAG-1;'
-                    self.ext_ltelte_lst.append(f'{i.Source_Site_Name}_{i.Target_ENB}_{i.Target_ENB_CI}')
+                    self.ext_ltelte_lst.append(key)
                     primary.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                    command_ext_ltelte])
 
                 if i.Source_BCCH == i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTRAFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
-                                     f'{i.Source_full_name},NEIGHBOURCELLNAME={i.Target_full_name},AGGREGATIONATTRI' \
-                                     f'BUTE=UL_INTRF_DET_COORD_NCELL_FLAG-0;'
+                                     f'"{i.Source_full_name}",NEIGHBOURCELLNAME="{i.Target_full_name}",' \
+                                     f'AGGREGATIONATTRIBUTE=UL_INTRF_DET_COORD_NCELL_FLAG-0;'
                     primary.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                    command_ltelte])
                 if i.Source_BCCH != i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTERFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
-                                     f'{i.Source_full_name} ,NEIGHBOURCELLNAME={i.Target_full_name} ,AGGREGATIONP' \
+                                     f'"{i.Source_full_name}" ,NEIGHBOURCELLNAME="{i.Target_full_name}" ,AGGREGATIONP' \
                                      f'ROPERTY=BlindScellCfg-1,OVERLAPINDICATOREXTENSION=VIRTUAL_4T4R_' \
                                      f'OVERLAP_INDICATOR-1;'
                     primary.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
@@ -238,7 +239,7 @@ class Huawei:
             if i.Type_ho == 'LTE>2G':
                 if f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}' not in self.ext_lte2g:
                     command_ext_lte2g = f'ADD GERANEXTERNALCELL:MCC="255",MNC="01",GERANCELLID={i.Target_Cell_ID},LAC' \
-                                        f'{i.Target_LAC},RACCFGIND=CFG,RAC={i.Target_LAC},BANDINDICATOR=GSM_dcs1800' \
+                                        f'={i.Target_LAC},RACCFGIND=CFG,RAC={i.Target_RAC},BANDINDICATOR=GSM_dcs1800' \
                                         f',GERANARFCN={i.Target_BCCH},NETWORKCOLOURCODE={i.Target_ncc},BASESTATIONC' \
                                         f'OLOURCODE={i.Target_bcc},CELLNAME="{i.Target_full_name}";'
                     self.ext_lte2g.append(f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}')
@@ -265,20 +266,20 @@ class Huawei:
         for i in self.__class__.lst_huawei:
             if i.Type_ho == '2G>LTE':
                 if f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}' not in self.ext_2glte:
-                    command_ext_2glte = f'ADD GEXTLTECELL:EXTLTECELLNAME="{i.Target_full_name}",MCC="255"MNC="01",' \
+                    command_ext_2glte = f'ADD GEXTLTECELL:EXTLTECELLNAME="{i.Target_full_name}",MCC="255",MNC="01",' \
                                         f'ENODEBTYPE=MACRO,CI={(int(i.Target_ENB)*256)+int(i.Target_ENB_CI)},TAC=' \
                                         f'{i.Target_LAC},FREQ={i.Target_BCCH},PCID={i.Target_BSIC},' \
                                         f'EUTRANTYPE=FDD,OPNAME="MTS Ukraine";'
                     self.ext_2glte.append(f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}')
                     primary.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho,
                                                                                             command_ext_2glte])
-                command_2glte = f'ADD GLTENCELL:IDTYPE=BYNAME,SRCLTENCELLNAME="{i.Source_full_name}"NBRLTENCELLNAME="' \
+                command_2glte = f'ADD GLTENCELL:IDTYPE=BYNAME,SRCLTENCELLNAME="{i.Source_full_name}",NBRLTENCELLNAME="' \
                                 f'{i.Target_full_name}",SPTRESEL=SUPPORT,SPTRAPIDSEL=SUPPORT;'
                 primary.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2glte])
 
     def create_ho_lte3g(self):
         for i in self.__class__.lst_huawei:
-            if i.Type_ho == 'LTE>3G':
+            if i.Type_ho == 'LTE>3G' and i.Target_BCCH == 10737:
                 if f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}' not in self.ext_lte3g_lst:
                     command_ext_lte3g = f'ADD UTRANEXTERNALCELL:MCC="255",MNC="01",RNCID={i.Target_BSC},CELLID=' \
                                         f'{i.Target_Cell_ID},UTRANDLARFCN={i.Target_BCCH},UTRANULARFCNCFGIND=NOT_CFG' \

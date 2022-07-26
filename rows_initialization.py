@@ -14,7 +14,8 @@ class primary:
                         '62526': '230', '22207': '503', '22279': '513', '402': '523', '22349': '533', '20705': '543',
                         '20704': '553', '20703': '563', '61602': '112', '61526': '102', '22461': '1503',
                         '22623': '1513', '368': '1543', '366': '1703', '15396': '1723', '360': '1903', '365': '1923',
-                        '356': '1862', '22178': '1872', '260': '1340', '22832': '1380', '377': '1608'}
+                        '356': '1862', '22178': '1872', '260': '1340', '22832': '1380', '377': '1608', '66844': '608',
+                        '66139': '618', '66140': '628', '378': '1518'}
 
     def __init__(self, row):
         self.Source_BSC = row[0]
@@ -37,8 +38,8 @@ class primary:
         self.Target_BSIC = int(row[15])
         self.Target_BCCH = row[16]
         self.Target_Azimuth = row[17]
-        self.Date_Add = row[18]
-        self.User = row[19]
+      #  self.Date_Add = row[18]
+      #  self.User = row[19]
         self.Source_full_name = self.used_name_bs(self.Source_Azimuth, self.Source_Site_Name, self.Source_BCCH)
         self.Target_full_name = self.used_name_bs(self.Target_Azimuth, self.Target_Site_Name, self.Target_BCCH)
         self.Source_ncc = self.ncc(self.Source_BSIC, self.Source_BCCH)
@@ -70,9 +71,9 @@ class primary:
         if bsc in (252, 322, 338, 358, 432, 452, 732, 822, 832, 922, 1252, 1322, 1432):
             return 'ZTE'
 
-        elif bsc in (210, 220, 230, 1340, 1380, 503, 513, 523, 533, 543, 553, 1608,
-                     563, 703, 713, 723, 733, 743, 753, 903, 913, 923, 933, 1503,
-                     1513, 1543, 1703, 1723, 1903, 1923, 1862, 1872, 112, 102, 528,):
+        elif bsc in (210, 220, 230, 1340, 1380, 503, 513, 523, 533, 543, 553, 1608,  563, 703,
+                     713, 723, 733, 743, 753, 903, 913, 923, 933, 1503, 1513, 1543, 1703, 1723,
+                     1903, 1923, 1862, 1872, 112, 102, 528, 608, 618, 628, 1518):
             return 'Huawei'
 
         elif bsc in (801, 811, 821, 831, 841, 851, 861, 871, 881, 891, 901, 911, 941, 921, 931,
@@ -143,7 +144,7 @@ class primary:
 
     @staticmethod
     def connect_sql():
-        sqlbd_vf_work = account_info.local_bd     # Коннект к БД
+        sqlbd_vf_work = account_info.vf_bd     # Коннект к БД
         connsqlbd_vf_work = create_engine(sqlbd_vf_work)
         return connsqlbd_vf_work
 

@@ -367,6 +367,7 @@ class ZTE:
             if i.Type_ho == '2G>3G' and key__bsc_ci_lac not in self.ext2g3g:
                 comand_extrnal = temp_external.render(Source_BSC=i.Source_BSC,
                                                       Ext_BTS_index=self.create_new_ext_index(i),
+                                                      Target_BSC=i.Target_BSC,
                                                       Target_LAC=i.Target_LAC,
                                                       Target_RAC=i.Target_RAC,
                                                       Target_BCCH=i.Target_BCCH,
