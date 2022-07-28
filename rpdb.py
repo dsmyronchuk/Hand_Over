@@ -23,7 +23,7 @@ class CellObject:
         self.Azimuth = row['Azimuth']
 
 
-class GetRpdbCell:
+class rpdb:
     lst_pre_df = []     # Итоговый лист, с сформированными соседними отношениями. Готов к созданию DataFrame
     df_cocite = ''      # переменная для хранения итогового DataFrame
 

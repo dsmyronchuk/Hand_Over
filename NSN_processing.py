@@ -1,4 +1,4 @@
-from rows_initialization import primary
+from readrows import ReadRows
 import pandas as pd
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -33,7 +33,7 @@ class NSN:
             self.create_csv_2g3g()
 
     def search_nsn(self):
-        for i in primary.lst_row:
+        for i in ReadRows.lst_row:
             if i.Source_vendor == 'NSN':
                 self.__class__.lst_nsn.append(i)
 
