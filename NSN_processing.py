@@ -1,11 +1,12 @@
 from readrows import ReadRows
+from Static_Cls import StaticCls
 import pandas as pd
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import openpyxl
 
 
-class NSN:
+class NSN(StaticCls):
     lst_nsn = []
     NSN_2G2G = []
     NSN_2G3G = []
@@ -13,9 +14,9 @@ class NSN:
     NSN_3G3G_adji = []
     NSN_3G3G_adjs = []
 
-    def __init__(self, main_bs, path_folder):
-        self.main_bs = main_bs
-        self.path_folder = path_folder
+    def __init__(self):
+        self.name_bs = StaticCls.name_bs
+        self.path_folder = StaticCls.path_folder
         self.search_nsn()                    # Из общего списка HandOver ищу Source ZTE обьекты
 
         # Генерация команд
@@ -240,7 +241,7 @@ class NSN:
 
         xml_string = ET.tostring(new).decode(errors='ignore')
         xml_prettyxml = minidom.parseString(xml_string).toprettyxml()
-        with open(f'{self.path_folder}/___NOKIA___{self.main_bs}_3G.xml', 'w') as xml_file:
+        with open(f'{self.path_folder}/___NOKIA___{self.name_bs}_3G.xml', 'w') as xml_file:
             xml_file.write(xml_prettyxml)
 
     def create_csv_2g2g(self):
@@ -251,7 +252,7 @@ class NSN:
                                                                      'bcchFrequency', 'adjCellBsicBcc',
                                                                      'adjCellBsicNcc'])
 
-        path_2g2g_csv = f'{self.path_folder}/___NOKIA___{self.main_bs}_2G2G.csv'
+        path_2g2g_csv = f'{self.path_folder}/___NOKIA___{self.name_bs}_2G2G.csv'
         wb = openpyxl.Workbook()
         wb.save(path_2g2g_csv)
         df_2g2g_csv.to_csv(path_2g2g_csv, index=False)
@@ -262,7 +263,7 @@ class NSN:
                                                                      '$targetRNCId', '$targetMCC', '$targetMNC',
                                                                      '$templateName'])
 
-        path_2g3g_csv = f'{self.path_folder}/___NOKIA___{self.main_bs}_2G3G.csv'
+        path_2g3g_csv = f'{self.path_folder}/___NOKIA___{self.name_bs}_2G3G.csv'
         wb = openpyxl.Workbook()
         wb.save(path_2g3g_csv)
         df_2g3g_csv.to_csv(path_2g3g_csv, index=False)

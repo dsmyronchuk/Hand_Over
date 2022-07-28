@@ -1,19 +1,20 @@
 import openpyxl
 from readrows import ReadRows
+from Static_Cls import StaticCls
 import pandas as pd
 import sql_request
 
 
-class Huawei:
+class Huawei(StaticCls):
     lst_huawei = []
 
     Huawei_from_2G = dict()    # Словарь с 2же командами
     Huawei_from_3G = dict()    # Словарь с 3же командами
     Huawei_from_LTE = dict()   # Словарь с LTE командами
 
-    def __init__(self, main_bs, path_folder):
-        self.main_bs = main_bs
-        self.path_folder = path_folder
+    def __init__(self):
+        self.name_bs = StaticCls.name_bs
+        self.path_folder = StaticCls.path_folder
 
         # переменные для хранения EXT и ARFCN LTE<>2G ( исключение дубликатов )
         self.ext_lte2g = []
@@ -47,10 +48,10 @@ class Huawei:
         path_2g_oss_name = sql_request.Huawei_2g_oss_name
         path_3g_oss_name = sql_request.Huawei_3g_oss_name
         path_ne_oss_name = sql_request.Huawei_lte_oss_name
-        self.oss_name_2g_dct = ReadRows.get_dct_4column(path_2g_oss_name, 'fdn', 'CI', 'LAC', 'CELLNAME', '3key_1value')
-        self.oss_name_3g_dct = ReadRows.get_dct_4column(path_3g_oss_name, 'LOGICRNCID', 'CELLID', 'LAC',
+        self.oss_name_2g_dct = self.get_dct_4column(path_2g_oss_name, 'fdn', 'CI', 'LAC', 'CELLNAME', '3key_1value')
+        self.oss_name_3g_dct = self.get_dct_4column(path_3g_oss_name, 'LOGICRNCID', 'CELLID', 'LAC',
                                                        'CELLNAME', '3key_1value')
-        self.oss_name_lte_dct = ReadRows.get_dct_4column(path_ne_oss_name, 'ENODEBFUNCTIONNAME', 'CELLID', 'DLEARFCN',
+        self.oss_name_lte_dct = self.get_dct_4column(path_ne_oss_name, 'ENODEBFUNCTIONNAME', 'CELLID', 'DLEARFCN',
                                                         'CELLNAME', '3key_1value')
 
         # корректировка имени по OSS ( если сота есть в OSS - перезаписать имя из OSS )
@@ -81,7 +82,7 @@ class Huawei:
 
         # выгрузка NE имен из oss и создание имени self.Name_NE
         path_ne_oss_name = sql_request.Huawei_ne_oss_name
-        sql_table = pd.read_sql(path_ne_oss_name, ReadRows.connect_sql())
+        sql_table = pd.read_sql(path_ne_oss_name, self.connect_sql())
         self.oss_ne_name = [row for row in sql_table['NAME']]
 
         # Если Source_Site_Name есть в БД подставить NE_Name ( имя БС в main topology ) из БД
@@ -93,28 +94,28 @@ class Huawei:
     def table_functions_external(self):
         # обработка таблицы EXT 2G2G
         path_2g2g_ext = sql_request.Huawei_2g2g_ext
-        self.ext_2G2G_lst = ReadRows.get_lst_3column(path_2g2g_ext, 'fdn', 'CI', 'LAC')
+        self.ext_2G2G_lst = self.get_lst_3column(path_2g2g_ext, 'fdn', 'CI', 'LAC')
 
         # обработка таблицы EXT 2G3G
         path_2g3g_ext = sql_request.Huawei_2g3g_ext
-        self.ext_2G3G_dict = ReadRows.get_dct_4column(path_2g3g_ext, 'fdn', 'CI', 'LAC', 'EXT3GCELLNAME', '3key_1value')
+        self.ext_2G3G_dict = self.get_dct_4column(path_2g3g_ext, 'fdn', 'CI', 'LAC', 'EXT3GCELLNAME', '3key_1value')
 
         # обработка таблицы EXT 3G2G
         path_3g2g_ext = sql_request.Huawei_3g2g_ext
-        self.ext_3G2G_dict = ReadRows.get_dct_4column(path_3g2g_ext, 'LOGICRNCID', 'CID', 'LAC',
+        self.ext_3G2G_dict = self.get_dct_4column(path_3g2g_ext, 'LOGICRNCID', 'CID', 'LAC',
                                                      'GSMCELLINDEX', '3key_1value')
 
         # обработка таблицы EXT 3G3G
         path_3g3g_ext = sql_request.Huawei_3g3g_ext
-        self.ext_3G3G_lst = ReadRows.get_lst_3column(path_3g3g_ext, 'LOGICRNCID', 'CELLID', 'LAC')
+        self.ext_3G3G_lst = self.get_lst_3column(path_3g3g_ext, 'LOGICRNCID', 'CELLID', 'LAC')
 
         # обработка таблицы EXT LTELTE
         path_4g4g_ext = sql_request.Huawei_4g4g_ext
-        self.ext_ltelte_lst = ReadRows.get_lst_3column(path_4g4g_ext, 'ENODEBFUNCTIONNAME', 'ENODEBID', 'CELLID')
+        self.ext_ltelte_lst = self.get_lst_3column(path_4g4g_ext, 'ENODEBFUNCTIONNAME', 'ENODEBID', 'CELLID')
 
         # обработка таблицы EXT LTE3G
         path_4g3g_ext = sql_request.Huawei_4g3g_ext
-        self.ext_lte3g_lst = ReadRows.get_lst_3column(path_4g3g_ext, 'ENODEBFUNCTIONNAME', 'CELLID', 'LAC')
+        self.ext_lte3g_lst = self.get_lst_3column(path_4g3g_ext, 'ENODEBFUNCTIONNAME', 'CELLID', 'LAC')
 
     def create_ho_2g2g(self):
         for i in self.__class__.lst_huawei:
@@ -124,13 +125,13 @@ class Huawei:
                                        f'{i.Target_LAC},CI={i.Target_Cell_ID},BCCH={i.Target_BCCH},NCC={i.Target_ncc}' \
                                        f',BCC={i.Target_bcc},RA={int(i.Target_RAC)};'
                     self.ext_2G2G_lst.append(i.Source_BSC__Target_CI_LAC)
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
                                                [i.Type_ho, command_ext_2g2g])
 
                 command_2g2g = f'ADD G2GNCELL:IDTYPE=BYCGI,SRCMCC="255",SRCMNC="01",SRCLAC={i.Source_LAC}' \
                                f',SRCCI={i.Source_Cell_ID},NBRMCC="255",NBRMNC="01",NBRLAC={i.Target_LAC}' \
                                f',NBRCI={i.Target_Cell_ID},NCELLTYPE=HANDOVERNCELL,SRCHOCTRLSWITCH=HOALGORITHM1;'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2g2g])
+                self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2g2g])
 
     def create_ho_2g3g(self):
         for i in self.__class__.lst_huawei:
@@ -141,13 +142,13 @@ class Huawei:
                                        f',SCRAMBLE={i.Target_BSIC},DIVERSITY=NO,UTRANCELLTYPE=FDD,OPNAME="MTS Ukraine' \
                                        f'",RA={i.Target_RAC};'
                     self.ext_2G3G_dict[i.Source_BSC__Target_CI_LAC] = i.Target_full_name
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
                                                [i.Type_ho, command_ext_2g3g])
 
                 # Source Name из oss_name_2g_dct; Target Name из ext_2G3G_dict
                 command_2g3g = f'ADD G3GNCELL:IDTYPE=BYNAME,SRC3GNCELLNAME="{i.Source_full_name}",NBR3GNCELLNAME="' \
                                f'{self.ext_2G3G_dict[i.Source_BSC__Target_CI_LAC]}";'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
+                self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC,
                                            [i.Type_ho, command_2g3g])
 
     def create_ho_3g3g(self):
@@ -164,14 +165,14 @@ class Huawei:
                                        f'ORT-1&EDCH_2MS_TTI_SUPPORT-1&EDCH_2SF2_SUPPORT-1&FLEX_MACD_PDU_SIZE_SUPP' \
                                        f'ORT-1&HSPAPLUS_DL_64QAM_SUPPORT-1,EFACHSUPIND=FALSE;'
                     self.ext_3G3G_lst.append(i.Source_BSC__Target_CI_LAC)
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
                                                [i.Type_ho, command_ext_3g3g])
 
                 if i.Source_BCCH == i.Target_BCCH:
                     command_3g3g = f'ADD UINTRAFREQNCELL:RNCID={i.Source_BSC},CELLID={i.Source_Cell_ID},NCELLRNCID=' \
                                    f'{i.Target_BSC},NCELLID={i.Target_Cell_ID},SIB11IND=TRUE,SIB12IND=FALSE,' \
                                    f'TPENALTYHCSRESELECT=D0,NPRIOFLAG=FALSE;'
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
                                                [i.Type_ho, command_3g3g])
                 if i.Source_BCCH != i.Target_BCCH:
 
@@ -183,7 +184,7 @@ class Huawei:
                                    f'{i.Target_BSC},NCELLID={i.Target_Cell_ID},SIB11IND=TRUE,SIB12IND=FALSE,TPENALTY' \
                                    f'HCSRESELECT=D0,BLINDHOFLAG={blind},NPRIOFLAG=FALSE,INTERNCELLQUALREQFLAG=FALSE,' \
                                    f'CLBFLAG=FALSE;'
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
                                                [i.Type_ho, command_3g3g])
 
     def create_ho_3g2g(self):
@@ -196,12 +197,12 @@ class Huawei:
                                        f'{i.Target_Cell_ID},NCC={i.Target_ncc},BCC={i.Target_bcc},BCCHARFCN=' \
                                        f'{i.Target_BCCH},RATCELLTYPE=EDGE,USEOFHCS=NOT_USED,SUPPPSHOFLAG=TRUE;'
                     self.ext_3G2G_dict[i.Source_BSC__Target_CI_LAC] = i.Target_Cell_ID
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
+                    self.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
                                                [i.Type_ho, command_ext_3g2g])
 
                 command_3g2g = f'ADD U2GNCELL:RNCID={i.Source_BSC},CELLID={i.Source_Cell_ID},GSMCELLINDEX=' \
                                f'{self.ext_3G2G_dict[i.Source_BSC__Target_CI_LAC]},BLINDHOFLAG=FALSE,NPRIOFLAG=FALSE;'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
+                self.check_append_dict(self.__class__.Huawei_from_3G, i.Source_BSC,
                                            [i.Type_ho, command_3g2g])
 
     def create_ho_ltelte(self):
@@ -215,7 +216,7 @@ class Huawei:
                                          f'UPDATEMODE=MFBI_UPDATE_MODE-1,SUPPORTEMTCFLAG=BOOLEAN_FALSE,AGGREGATIONAT' \
                                          f'TRIBUTE=MASTER_PLMN_RESERVED_FLAG-1;'
                     self.ext_ltelte_lst.append(key)
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_ext_ltelte])
 
                 if i.Source_BCCH == i.Target_BCCH:
@@ -223,7 +224,7 @@ class Huawei:
                                      f'ENODEBID={i.Target_ENB},CELLID={i.Target_ENB_CI},LOCALCELLNAME=' \
                                      f'"{i.Source_full_name}",NEIGHBOURCELLNAME="{i.Target_full_name}",' \
                                      f'AGGREGATIONATTRIBUTE=UL_INTRF_DET_COORD_NCELL_FLAG-0;'
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_ltelte])
                 if i.Source_BCCH != i.Target_BCCH:
                     command_ltelte = f'ADD EUTRANINTERFREQNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",' \
@@ -231,7 +232,7 @@ class Huawei:
                                      f'"{i.Source_full_name}" ,NEIGHBOURCELLNAME="{i.Target_full_name}" ,AGGREGATIONP' \
                                      f'ROPERTY=BlindScellCfg-1,OVERLAPINDICATOREXTENSION=VIRTUAL_4T4R_' \
                                      f'OVERLAP_INDICATOR-1;'
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_ltelte])
 
     def create_ho_lte2g(self):
@@ -243,14 +244,14 @@ class Huawei:
                                         f',GERANARFCN={i.Target_BCCH},NETWORKCOLOURCODE={i.Target_ncc},BASESTATIONC' \
                                         f'OLOURCODE={i.Target_bcc},CELLNAME="{i.Target_full_name}";'
                     self.ext_lte2g.append(f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_ext_lte2g])
 
                 if f'{i.Source_ENB}_{i.Source_ENB_CI}_{i.Target_BCCH}' not in self.arfcn_lte2g:
                     command_arfcn = f'ADD GERANNFREQGROUPARFCN:LOCALCELLID={i.Source_ENB_CI},BCCHGROUPID=0,GERANARFCN' \
                                     f'={i.Target_BCCH};'
                     self.ext_lte2g.append(f'{i.Source_ENB}_{i.Source_ENB_CI}_{i.Target_BCCH}')
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_arfcn])
 
                 i.BLINDHOPRIORITY = '0'
@@ -259,7 +260,7 @@ class Huawei:
                 command_lte2g = f'ADD GERANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",LAC={i.Target_LAC},' \
                                 f'GERANCELLID={i.Target_Cell_ID},BLINDHOPRIORITY={i.BLINDHOPRIORITY},LOCALCELLNAME=' \
                                 f'"{i.Source_full_name}" ,NEIGHBOURCELLNAME="{i.Target_full_name}";'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                 command_lte2g])
 
     def create_ho_2glte(self):
@@ -271,11 +272,11 @@ class Huawei:
                                         f'{i.Target_LAC},FREQ={i.Target_BCCH},PCID={i.Target_BSIC},' \
                                         f'EUTRANTYPE=FDD,OPNAME="MTS Ukraine";'
                     self.ext_2glte.append(f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho,
                                                                                              command_ext_2glte])
                 command_2glte = f'ADD GLTENCELL:IDTYPE=BYNAME,SRCLTENCELLNAME="{i.Source_full_name}",NBRLTENCELLNAME="' \
                                 f'{i.Target_full_name}",SPTRESEL=SUPPORT,SPTRAPIDSEL=SUPPORT;'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2glte])
+                self.check_append_dict(self.__class__.Huawei_from_2G, i.Source_BSC, [i.Type_ho, command_2glte])
 
     def create_ho_lte3g(self):
         for i in self.__class__.lst_huawei:
@@ -286,7 +287,7 @@ class Huawei:
                                         f',UTRANFDDTDDTYPE=UTRAN_FDD,RACCFGIND=CFG,RAC={i.Target_RAC},PSCRAMBCODE=' \
                                         f'{i.Target_BSIC},LAC={i.Target_LAC},CELLNAME="{i.Target_full_name}";'
                     self.ext_lte3g_lst.append(f'{i.Source_Site_Name}_{i.Target_Cell_ID}_{i.Target_LAC}')
-                    ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                    self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                     command_ext_lte3g])
                 blindhopriority_part = 'LOCALCELLNAME='
                 if i.Source_full_name[:15] == i.Target_full_name[:15]:
@@ -295,23 +296,23 @@ class Huawei:
                 command_lte3g = f'ADD UTRANNCELL:LOCALCELLID={i.Source_ENB_CI},MCC="255",MNC="01",RNCID=' \
                                 f'{i.Target_BSC},CELLID={i.Target_Cell_ID},{blindhopriority_part}"' \
                                 f'{i.Source_full_name}",NEIGHBOURCELLNAME="{i.Target_full_name}";'
-                ReadRows.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
+                self.check_append_dict(self.__class__.Huawei_from_LTE, i.Source_Site_Name, [i.Type_ho,
                                                                                                 command_lte3g])
 
     def sorting_for_xlsx(self):
-        self.__class__.Huawei_from_LTE = ReadRows.command_sort(self.__class__.Huawei_from_LTE, [
+        self.__class__.Huawei_from_LTE = self.command_sort(self.__class__.Huawei_from_LTE, [
             'ADD EUTRANEXTERNALCELL', 'ADD EUTRANINTRAFREQNCELL', 'ADD EUTRANINTERFREQNCELL', 'ADD GERANEXTERNALCELL',
             'ADD GERANNFREQGROUPARFCN', 'ADD GERANNCELL', 'ADD UTRANEXTERNALCELL', 'ADD UTRANNCELL'])
 
-        self.__class__.Huawei_from_2G = ReadRows.command_sort(self.Huawei_from_2G, [
+        self.__class__.Huawei_from_2G = self.command_sort(self.Huawei_from_2G, [
             'ADD GEXT2GCELL', 'ADD G2GNCELL', 'ADD GEXT3GCELL', 'ADD G3GNCELL', 'ADD GEXTLTECELL', 'ADD GLTENCEL'])
 
-        self.__class__.Huawei_from_3G = ReadRows.command_sort(self.Huawei_from_3G, [
+        self.__class__.Huawei_from_3G = self.command_sort(self.Huawei_from_3G, [
             'ADD UEXT3GCELL', 'ADD UINTRAFREQNCELL', 'ADD UINTERFREQNCELL', 'ADD UEXT2GCELL', 'ADD U2GNCELL'])
 
     def create_xlsx_file(self):
         wb = openpyxl.Workbook()
-        xlsx_path = f'{self.path_folder}/___HUAWEI___{self.main_bs}.xlsx'
+        xlsx_path = f'{self.path_folder}/___HUAWEI___{self.name_bs}.xlsx'
 
         wb.save(xlsx_path)
         with pd.ExcelWriter(xlsx_path, engine='openpyxl', mode='w') as writer:

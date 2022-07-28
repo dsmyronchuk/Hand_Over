@@ -26,7 +26,7 @@ class StaticCls:
 
     @staticmethod
     def connect_sql():
-        sqlbd_vf_work = secret_info.vf_bd     # Коннект к БД
+        sqlbd_vf_work = secret_info.sql_db     # Коннект к БД
         connsqlbd_vf_work = create_engine(sqlbd_vf_work)
         return connsqlbd_vf_work
 
