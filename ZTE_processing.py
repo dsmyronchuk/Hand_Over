@@ -1,7 +1,7 @@
-from readrows import ReadRows
-from Static_Cls import StaticCls
+from Readrows import ReadRows
+from Common import StaticCls
 from jinja2 import Template
-import sql_request
+import SQL_request
 import pandas as pd
 import openpyxl
 
@@ -15,6 +15,7 @@ class ZTE(StaticCls):
     def __init__(self,):
         self.name_bs = StaticCls.name_bs
         self.path_folder = StaticCls.path_folder
+        self.zte_template = self.resource_path('zte_template')      # путь к темплейтам ( под pyinstaller )
 
         self.search_zte()                   # Из общего списка HandOver ищу Source ZTE обьекты
         self.add_relation_parametr()        # добавляю локальные параметрі для relation
@@ -91,7 +92,7 @@ class ZTE(StaticCls):
                     i.earfcnUl = '1760'
                     i.earfcnDl = '1855'
 
-            if i.Type_ho =='LTE>2G':
+            if i.Type_ho == 'LTE>2G':
                 if i.Target_BCCH in range(1, 124):
                     i.freqBand = 6
                 if i.Target_BCCH in range(512, 885):
@@ -110,9 +111,9 @@ class ZTE(StaticCls):
 
     def add_2g_parametr_btsid(self):
         # выкачиваю и обрабатываю таблицу GGsmCell
-        path_gsm_cell = sql_request.ZTE_gsm_cell
+        path_gsm_cell = SQL_request.ZTE_gsm_cell
         self.gsm_cell_dict = self.get_dct_4column(path_gsm_cell, 'MEID', 'cellIdentity',
-                                                     'GBtsSiteManager', 'GGsmCell', '2key_2value')
+                                                  'GBtsSiteManager', 'GGsmCell', '2key_2value')
 
         # Если сота создана сегодня, её не будет в БД, по этому данные нужно ввести вручную
         for i in self.__class__.lst_zte:
@@ -134,7 +135,7 @@ class ZTE(StaticCls):
 
     def add_lte_parametr(self):
         # SubNetwork; MEID
-        path_ne = sql_request.ZTE_ne_sdr
+        path_ne = SQL_request.ZTE_ne_sdr
         sql_table = pd.read_sql(path_ne, self.connect_sql())
         dct = {row['Name']: [row['SubNetwork'], row['MEID']] for index, row in sql_table.iterrows()}
 
@@ -144,19 +145,19 @@ class ZTE(StaticCls):
                 i.MEID = dct[i.Source_Site_Name[:11]][1]
             # Если БС создана сегодня, то её не будет в БД, данные нужно ввести вручную
             elif i.Source_BCCH in (1700, 2900, 3676) and i.Source_Site_Name[:11] not in sql_table:
-                user_SubNetwork = input(f'Введите SubNetwork для соты {i.Source_full_name}: ')
-                user_MEID = input(f'Введите MEID для соты {i.Source_full_name}: ')
+                user_sub_network = input(f'Введите SubNetwork для соты {i.Source_full_name}: ')
+                user_meid = input(f'Введите MEID для соты {i.Source_full_name}: ')
 
-                i.SubNetwork = user_SubNetwork
-                i.MEID = user_MEID
+                i.SubNetwork = user_sub_network
+                i.MEID = user_meid
 
                 # добавляю в словарь для будущих строк с этой БС
-                dct[i.Source_Site_Name[:11]] = [user_SubNetwork, user_MEID]
+                dct[i.Source_Site_Name[:11]] = [user_sub_network, user_meid]
 
         # Target LTE Spectr (MHz)
-        path_lte_cell = sql_request.ZTE_lte_cell
+        path_lte_cell = SQL_request.ZTE_lte_cell
         dct_lte_cell = self.get_dct_4column(path_lte_cell, 'ENBFunctionFDD', 'cellLocalId', 'Name',
-                                               'bandWidthDl', '3key_1value')
+                                            'bandWidthDl', '3key_1value')
         for i in self.__class__.lst_zte:
             if i.Type_ho == 'LTE>LTE':
                 key = f'{i.Target_ENB}_{i.Target_ENB_CI}_{i.Target_Site_Name[:11]}'
@@ -170,73 +171,73 @@ class ZTE(StaticCls):
 
     def table_functions_relation(self):
         # Обработка таблицы 2G2G_relation ( для GGsmRelationSeq )
-        path_2g2g_relation = sql_request.ZTE_relation_index_2g2g
+        path_2g2g_relation = SQL_request.ZTE_relation_index_2g2g
         self.index_2g2g = self.get_dct_4column(path_2g2g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
-                                                  'GGsmRelationSeq', '3key_1value')
+                                               'GGsmRelationSeq', '3key_1value')
         for k, v in self.index_2g2g.items():  # передываю цельную строку в список строк
             self.index_2g2g[k] = v.split(',')
 
         # Обработка таблицы 2G3G_relation ( для GGsmRelationSeq )
-        path_2g3g_relation = sql_request.ZTE_relation_index_2g3g
+        path_2g3g_relation = SQL_request.ZTE_relation_index_2g3g
         self.index_2g3g = self.get_dct_4column(path_2g3g_relation, 'MEID', 'GBtsSiteManager', 'GGsmCell',
-                                                  'GUtranRelationSeq', '3key_1value')
+                                               'GUtranRelationSeq', '3key_1value')
         for k, v in self.index_2g3g.items():  # передываю цельную строку в список строк
             self.index_2g3g[k] = v.split(',')
 
         # обработка таблицы LTELTE_relation
-        path_4g4g_relation = sql_request.ZTE_relation_index_4g4g
+        path_4g4g_relation = SQL_request.ZTE_relation_index_4g4g
         self.index_4g4g = self.get_dct_4column(path_4g4g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                  'EUtranRelation_index', '3key_1value')
+                                               'EUtranRelation_index', '3key_1value')
         for k, v in self.index_4g4g.items():  # передываю цельную строку в список строк
             self.index_4g4g[k] = v.split(',')
 
         # обработка таблицы LTE2G_relation
-        path_4g2g_relation = sql_request.ZTE_relation_index_4g2g
+        path_4g2g_relation = SQL_request.ZTE_relation_index_4g2g
         self.index_4g2g = self.get_dct_4column(path_4g2g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                  'GsmRelation_index', '3key_1value')
+                                               'GsmRelation_index', '3key_1value')
         for k, v in self.index_4g2g.items():  # передываю цельную строку в список строк
             self.index_4g2g[k] = v.split(',')
 
         # обработка таблицы LTE3G_relation
-        path_4g3g_relation = sql_request.ZTE_relation_index_4g3g
+        path_4g3g_relation = SQL_request.ZTE_relation_index_4g3g
         self.index_4g3g = self.get_dct_4column(path_4g3g_relation, 'SubNetwork', 'MEID', 'EUtranCellFDD',
-                                                  'UtranRelation_index', '3key_1value')
+                                               'UtranRelation_index', '3key_1value')
         for k, v in self.index_4g3g.items():  # передываю цельную строку в список строк
             self.index_4g3g[k] = v.split(',')
 
     def table_functions_external(self):
         # обработка таблиц EXT 2G2G
-        path_ext2g2g = sql_request.ZTE_ext_2g2g
+        path_ext2g2g = SQL_request.ZTE_ext_2g2g
         self.ext2g2g = self.get_dct_4column(path_ext2g2g, 'MEID', 'cellIdentity', 'lac',
-                                               'GExternalGsmCell', '3key_1value')
+                                            'GExternalGsmCell', '3key_1value')
 
         # обработка таблиц EXT 2G3G
-        path_ext2g3g = sql_request.ZTE_ext_2g3g
+        path_ext2g3g = SQL_request.ZTE_ext_2g3g
         self.ext2g3g = self.get_dct_4column(path_ext2g3g, 'MEID', 'ci', 'lac',
-                                               'GExternalUtranCellFDD', '3key_1value')
+                                            'GExternalUtranCellFDD', '3key_1value')
 
         # обработка таблиц EXT 3G3G
-        path_ext3g3g = sql_request.ZTE_ext_3g3g
+        path_ext3g3g = SQL_request.ZTE_ext_3g3g
         self.ext3g3g = self.get_dct_4column(path_ext3g3g, 'MEID', 'cId', 'lac',
-                                               'UExternalUtranCellFDD', '3key_1value')
+                                            'UExternalUtranCellFDD', '3key_1value')
 
         # Обработка таблиц EXT 3G2G
-        path_ext3g2g = sql_request.ZTE_ext_3g2g
+        path_ext3g2g = SQL_request.ZTE_ext_3g2g
         self.ext3g2g = self.get_dct_4column(path_ext3g2g, 'MEID', 'cellIdentity', 'lac',
-                                               'UExternalGsmCell', '3key_1value')
+                                            'UExternalGsmCell', '3key_1value')
 
         # Обработка таблиц EXT LTELTE
-        path_ext4g4g = sql_request.ZTE_ext_4g4g
+        path_ext4g4g = SQL_request.ZTE_ext_4g4g
         self.ext4g4g = self.get_dct_4column(path_ext4g4g, 'SubNetwork', 'ENBFunctionFDD', 'Target_CI',
-                                               'ExternalEUtranCellFDD', '3key_1value')
+                                            'ExternalEUtranCellFDD', '3key_1value')
         # Обработка таблиц EXT LTE2G
-        path_ext4g2g = sql_request.ZTE_ext_4g2g
+        path_ext4g2g = SQL_request.ZTE_ext_4g2g
         self.ext4g2g = self.get_dct_4column(path_ext4g2g, 'SubNetwork', 'ENBFunctionFDD', 'cellIdentity',
-                                               'ExternalGsmCell', '3key_1value')
+                                            'ExternalGsmCell', '3key_1value')
         # Обработка таблиц EXT LTE3G
-        path_ext4g3g = sql_request.ZTE_ext_4g3g
+        path_ext4g3g = SQL_request.ZTE_ext_4g3g
         self.ext4g3g = self.get_dct_4column(path_ext4g3g, 'SubNetwork', 'ENBFunctionFDD', 'cId',
-                                               'ExternalUtranCellFDD', '3key_1value')
+                                            'ExternalUtranCellFDD', '3key_1value')
 
     def free_slot(self, obj_i):    # возврщатает свободный слот 129-192/0-31, и добавляет это значение в словарь
         key = ''
@@ -303,9 +304,9 @@ class ZTE(StaticCls):
         return new_value
 
     def create_ho_2g2g(self):
-        temp_self_ho = Template(open('zte_template/2g2g_temp__BSC=BSC.txt').read())
-        temp_another_ho = Template(open('zte_template/2g2g_temp__BSC!=BSC.txt').read())
-        temp_external = Template(open('zte_template/2g2g_temp_ext.txt').read())
+        temp_self_ho = Template(open(self.zte_template + '/2g2g_temp__BSC=BSC.txt').read())
+        temp_another_ho = Template(open(self.zte_template + '/2g2g_temp__BSC!=BSC.txt').read())
+        temp_external = Template(open(self.zte_template + '/2g2g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key__bsc_ci_lac = f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}'
@@ -325,7 +326,7 @@ class ZTE(StaticCls):
                                                       MacroMicroHoThs=i.MacroMicroHoThs,
                                                       HoPriority=i.HoPriority)
                 self.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_self_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '2G>2G' and i.Source_BSC != i.Target_BSC and key__bsc_ci_lac not in self.ext2g2g:
                 command_external_2g2g = temp_external.render(Source_BSC=i.Source_BSC,
@@ -340,7 +341,7 @@ class ZTE(StaticCls):
                                                              MsTxPwrMax=i.MsTxPwrMax,
                                                              MsTxPwrMaxCch=i.MsTxPwrMaxCch)
                 self.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_external_2g2g,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '2G>2G' and i.Source_BSC != i.Target_BSC and key__bsc_ci_lac in self.ext2g2g:
                 command_another_ho = temp_another_ho.render(Source_BSC=i.Source_BSC,
@@ -356,11 +357,11 @@ class ZTE(StaticCls):
                                                             MacroMicroHoThs=i.MacroMicroHoThs,
                                                             HoPriority=i.HoPriority)
                 self.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_another_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
     def create_ho_2g3g(self):
-        temp_ho = Template(open('zte_template/2g3g_temp_ho.txt').read())
-        temp_external = Template(open('zte_template/2g3g_temp_ext.txt').read())
+        temp_ho = Template(open(self.zte_template + '/2g3g_temp_ho.txt').read())
+        temp_external = Template(open(self.zte_template + '/2g3g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key__bsc_ci_lac = f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}'
@@ -376,7 +377,7 @@ class ZTE(StaticCls):
                                                       Target_Cell_ID=i.Target_Cell_ID,
                                                       Target_BSIC=i.Target_BSIC)
                 self.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, comand_extrnal,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '2G>3G':
                 command_ho = temp_ho.render(Source_BSC=i.Source_BSC,
@@ -387,12 +388,12 @@ class ZTE(StaticCls):
                                             Source_Cell_ID=i.Source_Cell_ID,
                                             Target_Cell_ID=i.Target_Cell_ID)
                 self.check_append_dict(self.__class__.ZTE_from_2G, i.Source_BSC, [i.Type_ho, command_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
     def create_ho_3g3g(self):
-        temp_self_ho = Template(open('zte_template/3g3g_temp__RNC=RNC.txt').read())
-        temp_another_ho = Template(open('zte_template/3g3g_temp__RNC!=RNC.txt').read())
-        temp_external = Template(open('zte_template/3g3g_temp_ext.txt').read())
+        temp_self_ho = Template(open(self.zte_template + '/3g3g_temp__RNC=RNC.txt').read())
+        temp_another_ho = Template(open(self.zte_template + '/3g3g_temp__RNC!=RNC.txt').read())
+        temp_external = Template(open(self.zte_template + '/3g3g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key__bsc_ci_lac = f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}'
@@ -408,7 +409,7 @@ class ZTE(StaticCls):
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_BSIC=i.Target_BSIC)
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '3G>3G' and i.Source_BSC != i.Target_BSC:
                 command_another_ho = temp_another_ho.render(Source_BSC=i.Source_BSC,
@@ -417,7 +418,7 @@ class ZTE(StaticCls):
                                                             UUtranRelation=f'{i.Target_BSC}{i.Target_Cell_ID}',
                                                             Ext_BTS_index=self.ext3g3g[key__bsc_ci_lac])
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_another_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '3G>3G' and i.Source_BSC == i.Target_BSC:
                 command_self_ho = temp_self_ho.render(Source_BSC=i.Source_BSC,
@@ -426,11 +427,11 @@ class ZTE(StaticCls):
                                                       Target_Name=i.Target_full_name,
                                                       Target_Cell_ID=i.Target_Cell_ID)
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_self_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
     def create_ho_3g2g(self):
-        temp_ho = Template(open('zte_template/3g2g_temp_ho.txt').read())
-        temp_external = Template(open('zte_template/3g2g_temp_ext.txt').read())
+        temp_ho = Template(open(self.zte_template + '/3g2g_temp_ho.txt').read())
+        temp_external = Template(open(self.zte_template + '/3g2g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key__bsc_ci_lac = f'{i.Source_BSC}_{i.Target_Cell_ID}_{i.Target_LAC}'
@@ -445,7 +446,7 @@ class ZTE(StaticCls):
                                                         Target_LAC=i.Target_LAC,
                                                         Target_RAC=i.Target_RAC)
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
             if i.Type_ho == '3G>2G':
                 command_ho = temp_ho.render(Source_BSC=i.Source_BSC,
@@ -454,12 +455,12 @@ class ZTE(StaticCls):
                                             Target_Name=i.Target_full_name,
                                             Ext_BTS_index=self.ext3g2g[key__bsc_ci_lac])
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_ho,
-                                                                                      i.info_column])
+                                                                                  i.info_column])
 
     def create_ho_4g4g(self):
-        temp_self_ho = Template(open('zte_template/4g4g_temp_self_bs.txt').read())
-        temp_another_ho = Template(open('zte_template/4g4g_temp_another_bs.txt').read())
-        temp_external = Template(open('zte_template/4g4g_temp_ext.txt').read())
+        temp_self_ho = Template(open(self.zte_template + '/4g4g_temp_self_bs.txt').read())
+        temp_another_ho = Template(open(self.zte_template + '/4g4g_temp_another_bs.txt').read())
+        temp_external = Template(open(self.zte_template + '/4g4g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key = ''
@@ -478,7 +479,7 @@ class ZTE(StaticCls):
                                                         Target_MHZ=i.Target_MHz,
                                                         Target_ENB=i.Target_ENB)
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
             if i.Type_ho == 'LTE>LTE' and i.Source_Site_Name != i.Target_Site_Name:
                 command_another_ho = temp_another_ho.render(SAA=i.SubNetwork,
@@ -489,7 +490,7 @@ class ZTE(StaticCls):
                                                             Target_Name=i.Target_full_name,
                                                             Ext_index=self.ext4g4g[key])
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_another_ho,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
             if i.Type_ho == 'LTE>LTE' and i.Source_Site_Name == i.Target_Site_Name:
                 command_self_ho = temp_self_ho.render(SAA=i.SubNetwork,
@@ -500,11 +501,11 @@ class ZTE(StaticCls):
                                                       EUtranRelation=self.free_slot(i),
                                                       Target_Name=i.Target_full_name)
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_self_ho,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
     def create_ho_4g2g(self):
-        temp_ho = Template(open('zte_template/4g2g_temp_ho.txt').read())
-        temp_external = Template(open('zte_template/4g2g_temp_ext.txt').read())
+        temp_ho = Template(open(self.zte_template + '/4g2g_temp_ho.txt').read())
+        temp_external = Template(open(self.zte_template + '/4g2g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key = ''
@@ -524,7 +525,7 @@ class ZTE(StaticCls):
                                                         Target_bcc=i.Target_bcc,
                                                         Target_RAC=i.Target_RAC)
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
             if i.Type_ho == 'LTE>2G':
                 command_ho = temp_ho.render(SAA=i.SubNetwork,
@@ -535,11 +536,11 @@ class ZTE(StaticCls):
                                             Target_Name=i.Target_full_name,
                                             External_index=self.ext4g2g[key])
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
     def create_ho_4g3g(self):
-        temp_ho = Template(open('zte_template/4g3g_temp_ho.txt').read())
-        temp_external = Template(open('zte_template/4g3g_temp_ext.txt').read())
+        temp_ho = Template(open(self.zte_template + '/4g3g_temp_ho.txt').read())
+        temp_external = Template(open(self.zte_template + '/4g3g_temp_ext.txt').read())
 
         for i in self.__class__.lst_zte:
             key = ''
@@ -559,7 +560,7 @@ class ZTE(StaticCls):
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_RAC=i.Target_RAC)
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_external,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
             if i.Type_ho == 'LTE>3G':
                 command_ho = temp_ho.render(SAA=i.SubNetwork,
@@ -570,7 +571,7 @@ class ZTE(StaticCls):
                                             ExternalUtranCellFDD=self.ext4g3g[key],
                                             Target_Name=i.Target_full_name)
                 self.check_append_dict(self.__class__.ZTE_from_LTE, i.SubNetwork, [i.Type_ho, command_ho,
-                                                                                       i.info_column])
+                                                                                   i.info_column])
 
     def sorting_for_xlsx(self):
         self.__class__.ZTE_from_2G = self.command_sort(self.__class__.ZTE_from_2G, [
@@ -597,6 +598,3 @@ class ZTE(StaticCls):
             if len(self.__class__.ZTE_from_LTE) > 0:
                 df_lte = pd.DataFrame(self.__class__.ZTE_from_LTE)
                 df_lte.to_excel(writer, sheet_name='LTE')
-
-
-

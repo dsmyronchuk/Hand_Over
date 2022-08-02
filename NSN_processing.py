@@ -1,5 +1,5 @@
-from readrows import ReadRows
-from Static_Cls import StaticCls
+from Readrows import ReadRows
+from Common import StaticCls
 import pandas as pd
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -10,6 +10,7 @@ class NSN(StaticCls):
     lst_nsn = []
     NSN_2G2G = []
     NSN_2G3G = []
+    NSN_2G4G = []
     NSN_3G2G = []
     NSN_3G3G_adji = []
     NSN_3G3G_adjs = []
@@ -17,13 +18,15 @@ class NSN(StaticCls):
     def __init__(self):
         self.name_bs = StaticCls.name_bs
         self.path_folder = StaticCls.path_folder
-        self.search_nsn()                    # Из общего списка HandOver ищу Source ZTE обьекты
+        self.search_nsn()  # Из общего списка HandOver ищу Source ZTE обьекты
+        self.BTS_2g4g = {}
 
         # Генерация команд
         self.create_ho_2g2g()
         self.create_ho_2g3g()
         self.create_ho_3g2g()
         self.create_ho_3g3g()
+        self.create_ho_2g4g()
 
         # Создание итоговых файлов xml; csv для СУ
         if (len(self.__class__.NSN_3G3G_adji) + len(self.__class__.NSN_3G3G_adjs) + len(self.__class__.NSN_3G2G)) > 0:
@@ -32,6 +35,8 @@ class NSN(StaticCls):
             self.create_csv_2g2g()
         if len(self.__class__.NSN_2G3G) > 0:
             self.create_csv_2g3g()
+        if len(self.__class__.NSN_2G4G) > 0:
+            self.create_txt_2g4g()
 
     def search_nsn(self):
         for i in ReadRows.lst_row:
@@ -99,6 +104,22 @@ class NSN(StaticCls):
                                str(int(i.Target_LAC)), str(int(i.Target_RAC)), str(int(i.Target_BSC)),
                                str(int(i.Target_BSIC)), str(int(i.Target_BCCH))]
                     self.__class__.NSN_3G3G_adji.append(row_xml)
+
+    def create_ho_2g4g(self):
+        for i in self.__class__.lst_nsn:
+            key = f'{i.Source_Cell_ID}_{i.Source_LAC}'
+
+            if i.Source_BCCH < 950 and i.Source_Site_Name[:11] == self.name_bs and key not in self.BTS_2g4g:
+                self.BTS_2g4g[key] = input(f'Введите BTS id для CI{i.Source_Cell_ID} (NSN 2G>LTE): ')
+
+                self.NSN_2G4G.append(f'ZEAN:BTS={self.BTS_2g4g[key]}:INDEX=1:TAC={i.Source_LAC},'
+                                     f'MCC=255,MNC=01:FREQ=1700,LTEMB=4,LTERXM=-130;')
+
+                self.NSN_2G4G.append(f'ZEAN:BTS={self.BTS_2g4g[key]}:INDEX=2:TAC={i.Source_LAC},'
+                                     f'MCC=255,MNC=01:FREQ=2900,LTEMB=4,LTERXM=-130;')
+
+                self.NSN_2G4G.append(f'ZEAN:BTS={self.BTS_2g4g[key]}:INDEX=3:TAC={i.Source_LAC},'
+                                     f'MCC=255,MNC=01:FREQ=3676,LTEMB=4,LTERXM=-130;')
 
     def create_xml_3g(self):
         # словари для managedObject
@@ -267,5 +288,11 @@ class NSN(StaticCls):
         wb = openpyxl.Workbook()
         wb.save(path_2g3g_csv)
         df_2g3g_csv.to_csv(path_2g3g_csv, index=False)
+
+    def create_txt_2g4g(self):
+        file_2g4g = open(f'{self.path_folder}/___NOKIA___{self.name_bs}_2G4G.txt', 'w')
+        for i in self.__class__.NSN_2G4G:
+            file_2g4g.write(f'{i}\n')
+
 
 
