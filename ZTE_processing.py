@@ -82,6 +82,12 @@ class ZTE(StaticCls):
                     i.MsTxPwrMaxCch = '5'
                     i.freqBand = '0'
 
+            if i.Type_ho == '3G>2G':
+                if i.Target_BCCH > 125:
+                    i.bandIndicator = 0
+                else:
+                    i.bandIndicator = 2
+
             if i.Type_ho == 'LTE>LTE':
                 if i.Target_BCCH == 3676:
                     i.freqBandInd = '8'
@@ -438,13 +444,16 @@ class ZTE(StaticCls):
 
             if i.Type_ho == '3G>2G' and key__bsc_ci_lac not in self.ext3g2g:
                 command_external = temp_external.render(Source_BSC=i.Source_BSC,
+                                                        Target_BSC=i.Target_BSC,
                                                         Ext_BTS_index=self.create_new_ext_index(i),
                                                         Target_Name=i.Target_full_name,
+                                                        Target_BCCH=i.Target_BCCH,
                                                         Target_bcc=i.Target_ncc,
                                                         Target_ncc=i.Target_bcc,
                                                         Target_Cell_ID=i.Target_Cell_ID,
                                                         Target_LAC=i.Target_LAC,
-                                                        Target_RAC=i.Target_RAC)
+                                                        Target_RAC=i.Target_RAC,
+                                                        bandIndicator=i.bandIndicator)
                 self.check_append_dict(self.__class__.ZTE_from_3G, i.Source_BSC, [i.Type_ho, command_external,
                                                                                   i.info_column])
 
