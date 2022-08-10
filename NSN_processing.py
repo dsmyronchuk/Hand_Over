@@ -110,7 +110,7 @@ class NSN(StaticCls):
             key = f'{i.Source_Cell_ID}_{i.Source_LAC}'
 
             if i.Source_BCCH < 950 and i.Source_Site_Name[:11] == self.name_bs and key not in self.BTS_2g4g:
-                self.BTS_2g4g[key] = input(f'Введите BTS id для CI{i.Source_Cell_ID} (NSN 2G>LTE): ')
+                self.BTS_2g4g[key] = input(f'Введите BTS id для CI {i.Source_Cell_ID} (NSN 2G>LTE): ')
 
                 self.NSN_2G4G.append(f'ZEAN:BTS={self.BTS_2g4g[key]}:INDEX=1:TAC={i.Source_LAC},'
                                      f'MCC=255,MNC=01:FREQ=1700,LTEMB=4,LTERXM=-130;')

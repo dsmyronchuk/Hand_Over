@@ -255,15 +255,15 @@ class ZTE(StaticCls):
         if obj_i.Type_ho == 'LTE>2G':
             dct = self.index_4g2g
             key = f'{obj_i.SubNetwork}_{obj_i.MEID}_{obj_i.Source_CI_256}'
-            start, finish = 0, 31
+            start, finish = 0, 40
         if obj_i.Type_ho == 'LTE>3G':
             dct = self.index_4g3g
             key = f'{obj_i.SubNetwork}_{obj_i.MEID}_{obj_i.Source_CI_256}'
-            start, finish = 0, 31
+            start, finish = 0, 40
         if obj_i.Type_ho == 'LTE>LTE':
             dct = self.index_4g4g
             key = f'{obj_i.SubNetwork}_{obj_i.MEID}_{obj_i.Source_CI_256}'
-            start, finish = 0, 31
+            start, finish = 0, 40
 
         if key in dct:
             lst = dct[key]
@@ -273,7 +273,7 @@ class ZTE(StaticCls):
                     dct[key] = lst
                     return str(i)
 
-        else:
+        if key not in dct:
             dct[key] = [f'{start}']
             return f'{start}'
 

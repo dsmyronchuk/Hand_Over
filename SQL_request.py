@@ -24,17 +24,17 @@ ZTE_relation_index_2g3g = '''SELECT MEID, GBtsSiteManager, GGsmCell, GROUP_CONCA
 ZTE_relation_index_4g4g = '''SELECT SubNetwork, MEID, EUtranCellFDD, GROUP_CONCAT(DISTINCT EUtranRelation
                          ORDER BY EUtranRelation) as EUtranRelation_index
                          FROM `parse_zte_general`.`FDD_SDR_EUtranRelation`
-                         GROUP BY MEID;'''
+                         GROUP BY MEID, EUtranCellFDD;'''
 
 ZTE_relation_index_4g2g = '''SELECT SubNetwork, MEID, EUtranCellFDD, GROUP_CONCAT(DISTINCT GsmRelation
                          ORDER BY GsmRelation) as GsmRelation_index
                          FROM `parse_zte_general`.`FDD_SDR_GsmRelation`
-                         GROUP BY MEID;'''
+                         GROUP BY MEID, EUtranCellFDD;'''
 
 ZTE_relation_index_4g3g = '''SELECT SubNetwork, MEID, EUtranCellFDD, GROUP_CONCAT(DISTINCT UtranRelation
                          ORDER BY UtranRelation) as UtranRelation_index
                          FROM `parse_zte_general`.`FDD_SDR_UtranRelation`
-                         GROUP BY MEID;'''
+                         GROUP BY MEID, EUtranCellFDD;'''
 
 ZTE_ext_2g2g = '''SELECT MEID, cellIdentity, lac, GExternalGsmCell 
               FROM `parse_zte_general`.`GSM_Controller_GExternalGsmCell`'''
