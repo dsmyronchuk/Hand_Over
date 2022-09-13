@@ -99,9 +99,9 @@ class ZTE(StaticCls):
                     i.earfcnDl = '1855'
 
             if i.Type_ho == 'LTE>2G':
-                if i.Target_BCCH in range(1, 124):
+                if i.Target_BCCH in range(1, 125):
                     i.freqBand = 6
-                if i.Target_BCCH in range(512, 885):
+                if i.Target_BCCH in range(512, 886):
                     i.freqBand = 9
 
             if i.Type_ho == 'LTE>3G':
