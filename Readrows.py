@@ -1,3 +1,6 @@
+import Secret_info
+
+
 class ReadRows:
     lst_row = []
     duplicate_check = []
@@ -53,16 +56,13 @@ class ReadRows:
 
     @staticmethod
     def check_vendor(bsc):
-        if bsc in (252, 322, 338, 358, 432, 452, 732, 822, 832, 922, 1252, 1322, 1432):
+        if bsc in Secret_info.ZTE_Controller:
             return 'ZTE'
 
-        elif bsc in (210, 220, 230, 1340, 1380, 503, 513, 523, 533, 543, 553, 1608,  563, 703,
-                     713, 723, 733, 743, 753, 903, 913, 923, 933, 1503, 1513, 1543, 1703, 1723,
-                     1903, 1923, 1862, 1872, 112, 102, 528, 608, 618, 628, 1518, 991, 992, 993):
+        elif bsc in Secret_info.Huawei_Controller:
             return 'Huawei'
 
-        elif bsc in (801, 811, 821, 831, 841, 851, 861, 871, 881, 891, 901, 911, 941, 921, 931,
-                     1801, 1811, 1821, 1831, 1901, 1911, 1921, 711, 731, 741):
+        elif bsc in Secret_info.NSN_Controller:
             return 'NSN'
 
     def check_type_ho(self):

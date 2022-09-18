@@ -10,13 +10,6 @@ import Secret_info
 class StaticCls:
     name_bs = ''
     path_folder = ''
-    index_BSC_Huawei = {'383': '703', '384': '713', '395': '723', '15290': '733', '15394': '743', '15395': '753',
-                        '259': '903', '359': '913', '381': '923', '382': '933', '62233': '210', '62236': '220',
-                        '62526': '230', '22207': '503', '22279': '513', '402': '523', '22349': '533', '20705': '543',
-                        '20704': '553', '20703': '563', '61602': '112', '61526': '102', '22461': '1503',
-                        '22623': '1513', '368': '1543', '366': '1703', '15396': '1723', '360': '1903', '365': '1923',
-                        '356': '1862', '22178': '1872', '260': '1340', '22832': '1380', '377': '1608', '66844': '608',
-                        '66139': '618', '66140': '628', '378': '1518', '66619': '991', '66620': '992', '66621': '993'}
 
     @staticmethod
     def check_append_dict(input_dict, key, value):
@@ -36,7 +29,7 @@ class StaticCls:
         sql_table = pd.read_sql(path, StaticCls.connect_sql())
         if column_1 == 'fdn':
             sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-            sql_table[column_1] = sql_table[column_1].map(StaticCls.index_BSC_Huawei).fillna(sql_table[column_1])
+            sql_table[column_1] = sql_table[column_1].map(Secret_info.index_BSC_Huawei).fillna(sql_table[column_1])
         sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
                                                    axis=1)
         out_lst = [i for i in sql_table['correct_key']]
@@ -50,7 +43,7 @@ class StaticCls:
         if type_dct == '3key_1value':       # Используется в Huawei
             if column_1 == 'fdn':
                 sql_table[column_1] = sql_table[column_1].map(lambda x: str(x.split(",")[0].split("=")[1]))
-                sql_table[column_1] = sql_table[column_1].map(StaticCls.index_BSC_Huawei).fillna(sql_table[column_1])
+                sql_table[column_1] = sql_table[column_1].map(Secret_info.index_BSC_Huawei).fillna(sql_table[column_1])
             sql_table['correct_key'] = sql_table.apply(lambda row: f'{row[column_1]}_{row[column_2]}_{row[column_3]}',
                                                        axis=1)
             out_dict = {row['correct_key']: row[column_4] for index, row in sql_table.iterrows()}
